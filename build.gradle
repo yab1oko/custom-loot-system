@@ -155,6 +155,17 @@ dependencies {
     // Jar file must be libs/cold_weapons-1.1.jar (group:name:version via flatDir).
     implementation fg.deobf("blank:cold_weapons:1.1")
 
+    // IDE-only chest test mods. Production jars in run/mods break mixins under official
+    // mappings (InvalidMixinException @Shadow f_*/m_*). fg.deobf remaps from libs/.
+    runtimeOnly fg.deobf("blank:zeta:1.0-31")
+    runtimeOnly fg.deobf("blank:quark:4.0-462")
+    runtimeOnly fg.deobf("blank:curios-forge:5.14.1")
+    runtimeOnly fg.deobf("blank:geckolib-forge:1.20.1-4.8.4")
+    runtimeOnly fg.deobf("blank:ars_nouveau:1.20.1-4.12.7-all")
+    runtimeOnly fg.deobf("blank:ironchest:1.20.1-14.4.4")
+    runtimeOnly fg.deobf("blank:moonlight:1.20-2.16.39-forge")
+    runtimeOnly fg.deobf("blank:supplementaries:1.20-3.1.44-forge")
+
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

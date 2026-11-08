@@ -49,6 +49,7 @@ public class ModCreativeTabs {
                         output.accept(ModItems.CORPSE.get());
                         output.accept(ModItems.AIRDROP.get());
                         output.accept(ModItems.CONVERSION_WAND.get());
+                        output.accept(ModItems.CHEST_LIBRARY.get());
                         for (var dresser : ModItems.DRESSERS) {
                             output.accept(dresser.get());
                         }

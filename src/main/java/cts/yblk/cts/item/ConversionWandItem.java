@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -61,7 +62,10 @@ public class ConversionWandItem extends Item {
         if (state.is(ModTags.PROP_CONTAINER) || state.is(ModBlocks.CONVERTED_CONTAINER.get())) {
             return false;
         }
-        if (!state.is(ModTags.CONVERTIBLE)) {
+        boolean allowed = state.is(ModTags.CONVERTIBLE)
+                || state.getBlock() instanceof ChestBlock
+                || state.is(ModTags.CHEST_LIKE);
+        if (!allowed) {
             return false;
         }
         if (state.hasProperty(BlockStateProperties.CHEST_TYPE)

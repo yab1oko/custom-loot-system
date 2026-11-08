@@ -2,20 +2,25 @@ package cts.yblk.cts.network;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.NetworkHooks;
 import cts.yblk.cts.block.CanStashBlock;
 import cts.yblk.cts.block.ConvertedContainerBlock;
+import cts.yblk.cts.blockentity.CanStashBlockEntity;
 import cts.yblk.cts.blockentity.ConvertedContainerBlockEntity;
 import cts.yblk.cts.item.ConversionWandItem;
 import cts.yblk.cts.registry.ModBlocks;
@@ -67,16 +72,39 @@ public class ConvertContainerPacket {
             return;
         }
         BlockEntity old = level.getBlockEntity(pos);
-        dropContainerContents(level, pos, old);
+        ResourceLocation lootTable = lootTableOf(old);
+        ItemStack[] preserved = lootTable == null ? snapshotItems(old) : null;
+
         Direction facing = ConvertedContainerBlock.facingFrom(state);
         BlockState converted = ModBlocks.CONVERTED_CONTAINER.get().defaultBlockState()
                 .setValue(CanStashBlock.FACING, facing)
                 .setValue(CanStashBlock.LOOTED, false);
         level.setBlock(pos, converted, Block.UPDATE_ALL);
-        if (level.getBlockEntity(pos) instanceof ConvertedContainerBlockEntity entity) {
-            entity.setMimic(state);
+        if (!(level.getBlockEntity(pos) instanceof ConvertedContainerBlockEntity entity)) {
+            return;
         }
+        entity.setMimic(state);
+
+        boolean openConfig = false;
+        if (lootTable != null) {
+            entity.applySettings(CanStashBlockEntity.Mode.LOOT_TABLE, lootTable.toString(),
+                    entity.getRespawnSeconds(), entity.getSearchSeconds(), false);
+        } else if (preserved != null && hasAny(preserved)) {
+            entity.setMode(CanStashBlockEntity.Mode.ITEMS);
+            int limit = Math.min(preserved.length, CanStashBlockEntity.SLOT_COUNT);
+            for (int i = 0; i < limit; i++) {
+                ItemStack stack = preserved[i];
+                if (stack != null && !stack.isEmpty()) {
+                    entity.placeTemplate(i, stack);
+                }
+            }
+            openConfig = true;
+        }
+
         player.displayClientMessage(Component.translatable("gui.cts.convert_done"), true);
+        if (openConfig) {
+            NetworkHooks.openScreen(player, entity, pos);
+        }
     }
 
     private static void revert(Level level, BlockPos pos, BlockState state, ServerPlayer player) {
@@ -89,21 +117,36 @@ public class ConvertContainerPacket {
         player.displayClientMessage(Component.translatable("gui.cts.convert_reverted"), true);
     }
 
-    private static void dropContainerContents(Level level, BlockPos pos, BlockEntity entity) {
-        if (!(entity instanceof Container container)) {
-            return;
+    private static ResourceLocation lootTableOf(BlockEntity entity) {
+        if (!(entity instanceof RandomizableContainerBlockEntity)) {
+            return null;
         }
-        for (int i = 0; i < container.getContainerSize(); i++) {
+        CompoundTag tag = entity.saveWithoutMetadata();
+        if (tag.contains("LootTable", Tag.TAG_STRING)) {
+            return ResourceLocation.tryParse(tag.getString("LootTable"));
+        }
+        return null;
+    }
+
+    private static ItemStack[] snapshotItems(BlockEntity entity) {
+        if (!(entity instanceof Container container)) {
+            return null;
+        }
+        int size = Math.min(container.getContainerSize(), CanStashBlockEntity.SLOT_COUNT);
+        ItemStack[] stacks = new ItemStack[size];
+        for (int i = 0; i < size; i++) {
             ItemStack stack = container.getItem(i);
-            if (!stack.isEmpty()) {
-                double x = pos.getX() + 0.5D;
-                double y = pos.getY() + 0.5D;
-                double z = pos.getZ() + 0.5D;
-                ItemEntity item = new ItemEntity(level, x, y, z, stack.copy());
-                item.setDefaultPickUpDelay();
-                level.addFreshEntity(item);
-                container.setItem(i, ItemStack.EMPTY);
+            stacks[i] = stack.isEmpty() ? ItemStack.EMPTY : stack.copy();
+        }
+        return stacks;
+    }
+
+    private static boolean hasAny(ItemStack[] stacks) {
+        for (ItemStack stack : stacks) {
+            if (stack != null && !stack.isEmpty()) {
+                return true;
             }
         }
+        return false;
     }
 }

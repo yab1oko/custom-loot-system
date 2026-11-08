@@ -6,6 +6,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -31,6 +33,17 @@ public class ConvertedContainerBlockEntity extends CanStashBlockEntity {
     @Override
     public Component getDisplayName() {
         return mimic.getBlock().getName();
+    }
+
+    @Override
+    public void saveToItem(ItemStack stack) {
+        super.saveToItem(stack);
+        CompoundTag tag = BlockItem.getBlockEntityData(stack);
+        if (tag == null) {
+            tag = new CompoundTag();
+        }
+        tag.put("Mimic", NbtUtils.writeBlockState(mimic));
+        BlockItem.setBlockEntityData(stack, getType(), tag);
     }
 
     @Override

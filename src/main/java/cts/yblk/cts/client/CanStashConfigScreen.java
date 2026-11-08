@@ -88,6 +88,11 @@ public class CanStashConfigScreen extends AbstractContainerScreen<CanStashConfig
             sendSettings();
         }).bounds(leftPos + 8, topPos + 113 + CanStashConfigMenu.TOP_EXTRA, 90, 16).build());
 
+        addRenderableWidget(Button.builder(Component.translatable("gui.cts.chest_library.save"), button -> {
+            sendSettings();
+            ChestLibraryClient.openSavePrompt(stash.getBlockPos(), stash.getDisplayName().getString());
+        }).bounds(leftPos + imageWidth - 78, topPos + 113 + CanStashConfigMenu.TOP_EXTRA, 70, 16).build());
+
         updateModeWidgets();
     }
 

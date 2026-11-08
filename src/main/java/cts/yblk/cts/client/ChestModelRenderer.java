@@ -11,8 +11,7 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.TrappedChestBlock;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.ChestType;
@@ -45,6 +44,14 @@ public final class ChestModelRenderer {
     }
 
     public void render(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, Direction facing, float openness, Material material) {
+        renderParts(poseStack, light, overlay, facing, openness, material.buffer(buffer, RenderType::entityCutout));
+    }
+
+    public void render(PoseStack poseStack, MultiBufferSource buffer, int light, int overlay, Direction facing, float openness, ResourceLocation texture) {
+        renderParts(poseStack, light, overlay, facing, openness, buffer.getBuffer(RenderType.entityCutout(texture)));
+    }
+
+    private void renderParts(PoseStack poseStack, int light, int overlay, Direction facing, float openness, VertexConsumer consumer) {
         poseStack.pushPose();
         poseStack.translate(0.5D, 0.5D, 0.5D);
         poseStack.mulPose(Axis.YP.rotationDegrees(-facing.toYRot()));
@@ -52,21 +59,10 @@ public final class ChestModelRenderer {
         float clamped = Math.max(0.0F, Math.min(1.0F, openness));
         lid.xRot = -(clamped * ((float) Math.PI / 2.0F));
         lock.xRot = lid.xRot;
-        VertexConsumer consumer = material.buffer(buffer, RenderType::entityCutout);
         bottom.render(poseStack, consumer, light, overlay);
         lid.render(poseStack, consumer, light, overlay);
         lock.render(poseStack, consumer, light, overlay);
         poseStack.popPose();
-    }
-
-    public static Material materialFor(BlockState mimic) {
-        if (mimic.is(Blocks.TRAPPED_CHEST) || mimic.getBlock() instanceof TrappedChestBlock) {
-            return Sheets.CHEST_TRAP_LOCATION;
-        }
-        if (mimic.is(Blocks.ENDER_CHEST)) {
-            return Sheets.ENDER_CHEST_LOCATION;
-        }
-        return Sheets.CHEST_LOCATION;
     }
 
     public static Direction facingOf(BlockState state, Direction fallback) {

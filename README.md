@@ -27,7 +27,10 @@ An invisible floor or wall plate that shows a single item. Right-click to pick i
 Props look like junk, storage, or furniture. Hold use to search, then open a chest-style inventory. They support template items or loot-table mode, a configurable search time, full and empty models, open sounds, and a respawn timer. Optional “needs tool” mode only opens with a matching held item — tools lose durability, stackables are consumed.
 
 ### Conversion Wand
-Turns a vanilla container (chest, barrel, hopper, dispenser, dropper, shulker box, and more) into a CTS loot container while keeping its look. Confirm before converting; use the wand again to revert. Double chests are not supported.
+Turns a container (vanilla chest/barrel/hopper/shulker and more, plus modded chests) into a CTS loot container while keeping its look. Loot tables and inventory contents are kept (not dropped); if items were present, the config screen opens so you can tune chances and counts. Confirm before converting; use the wand again to revert. Double chests are not supported. Add mod chests to the `#cts:convertible` and `#cts:chest_like` block tags for convert + lid animation.
+
+### Chest Library
+Creative tool that stores CTS loot-container setups (props and converted containers) in a **per-world** library. Open the library to rename, delete, preview contents/loot table, or take a placeable item of the same block. Shift+right-click a CTS container (or use Save in its config) to add it to the library.
 
 ### Loot Table Editor
 An in-game book for building chest loot tables and exporting JSON for datapacks and map folders. Entries support chance, stack size, random durability, and random enchantments, plus tag slips with member preview and filters. After exporting to `.minecraft`, run `/exportlt` in the world to embed them, then `/reload`.

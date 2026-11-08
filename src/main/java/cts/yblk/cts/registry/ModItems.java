@@ -3,6 +3,7 @@ package cts.yblk.cts.registry;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import cts.yblk.cts.item.ChestLibraryItem;
 import cts.yblk.cts.item.ChestPropItem;
 import cts.yblk.cts.item.ConversionWandItem;
 import cts.yblk.cts.item.HarvestTreeItem;
@@ -101,6 +102,9 @@ public class ModItems {
 
     public static final RegistryObject<Item> CONVERSION_WAND = ITEMS.register("conversion_wand",
             () -> new ConversionWandItem(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> CHEST_LIBRARY = ITEMS.register("chest_library",
+            () -> new ChestLibraryItem(new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> DRESSER_OAK = dresser(ModBlocks.DRESSER_OAK);
     public static final RegistryObject<Item> DRESSER_SPRUCE = dresser(ModBlocks.DRESSER_SPRUCE);

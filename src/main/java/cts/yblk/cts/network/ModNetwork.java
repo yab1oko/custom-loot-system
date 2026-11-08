@@ -6,7 +6,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import cts.yblk.cts.Cts;
 
 public class ModNetwork {
-    private static final String PROTOCOL = "21";
+    private static final String PROTOCOL = "22";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(Cts.MODID, "main"),
             () -> PROTOCOL,
@@ -108,5 +108,29 @@ public class ModNetwork {
                 SearchAnimPacket::encode,
                 SearchAnimPacket::decode,
                 SearchAnimPacket::handle);
+        CHANNEL.registerMessage(id++, RequestChestLibraryPacket.class,
+                RequestChestLibraryPacket::encode,
+                RequestChestLibraryPacket::decode,
+                RequestChestLibraryPacket::handle);
+        CHANNEL.registerMessage(id++, SyncChestLibraryPacket.class,
+                SyncChestLibraryPacket::encode,
+                SyncChestLibraryPacket::decode,
+                SyncChestLibraryPacket::handle);
+        CHANNEL.registerMessage(id++, RenameSavedChestPacket.class,
+                RenameSavedChestPacket::encode,
+                RenameSavedChestPacket::decode,
+                RenameSavedChestPacket::handle);
+        CHANNEL.registerMessage(id++, DeleteSavedChestPacket.class,
+                DeleteSavedChestPacket::encode,
+                DeleteSavedChestPacket::decode,
+                DeleteSavedChestPacket::handle);
+        CHANNEL.registerMessage(id++, TakeSavedChestPacket.class,
+                TakeSavedChestPacket::encode,
+                TakeSavedChestPacket::decode,
+                TakeSavedChestPacket::handle);
+        CHANNEL.registerMessage(id++, SaveChestToLibraryPacket.class,
+                SaveChestToLibraryPacket::encode,
+                SaveChestToLibraryPacket::decode,
+                SaveChestToLibraryPacket::handle);
     }
 }

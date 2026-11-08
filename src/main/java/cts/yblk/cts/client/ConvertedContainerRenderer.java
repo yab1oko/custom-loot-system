@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
 import cts.yblk.cts.block.CanStashBlock;
 import cts.yblk.cts.blockentity.ConvertedContainerBlockEntity;
+import cts.yblk.cts.registry.ModTags;
 
 public class ConvertedContainerRenderer implements BlockEntityRenderer<ConvertedContainerBlockEntity> {
     private final ChestModelRenderer chest;
@@ -45,11 +46,9 @@ public class ConvertedContainerRenderer implements BlockEntityRenderer<Converted
                 ? entity.getBlockState().getValue(CanStashBlock.FACING)
                 : Direction.NORTH;
 
-        if (mimic.getBlock() instanceof ChestBlock) {
-            chest.render(poseStack, buffer, light, overlay,
-                    ChestModelRenderer.facingOf(mimic, fallback),
-                    openness,
-                    ChestModelRenderer.materialFor(mimic));
+        if (mimic.getBlock() instanceof ChestBlock || mimic.is(ModTags.CHEST_LIKE)) {
+            MimicChestLooks.render(mimic, entity.getBlockPos(), partialTick, poseStack, buffer, light, overlay,
+                    openness, ChestModelRenderer.facingOf(mimic, fallback), chest);
             return;
         }
         if (mimic.getBlock() instanceof BarrelBlock) {

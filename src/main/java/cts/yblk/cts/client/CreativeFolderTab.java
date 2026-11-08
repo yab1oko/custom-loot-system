@@ -128,7 +128,8 @@ public class CreativeFolderTab {
         layout.add(new ItemStack(ModItems.LOOT_BOOK.get()));
         layout.add(new ItemStack(ModItems.TAG_SLIP.get()));
         layout.add(new ItemStack(ModItems.CONVERSION_WAND.get()));
-        padRow(5);
+        layout.add(new ItemStack(ModItems.CHEST_LIBRARY.get()));
+        padRow(6);
         appendFolder(PROPS);
         appendFolder(BLOCKS);
         appendFolder(BREAKABLES);
