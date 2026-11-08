@@ -1,0 +1,11 @@
+{
+  "values": [
+    "cts:barricade",
+    "cts:ventilation_grille",
+    "cts:metal_ore",
+    "cts:harvest_tree",
+    "cts:harvest_tree_trunk",
+    "cts:harvest_tree_branch",
+    "cts:harvest_tree_leaves"
+  ]
+}

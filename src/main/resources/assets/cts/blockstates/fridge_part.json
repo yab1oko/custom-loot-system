@@ -1,0 +1,5 @@
+{
+  "multipart": [
+    { "apply": { "model": "cts:block/fridge_part" } }
+  ]
+}

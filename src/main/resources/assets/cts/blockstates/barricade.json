@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "cts:block/barricade_empty" }
+  }
+}

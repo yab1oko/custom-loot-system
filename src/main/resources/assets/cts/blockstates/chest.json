@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,looted=false": { "model": "cts:block/chest" },
+    "facing=east,looted=false": { "model": "cts:block/chest", "y": 90 },
+    "facing=south,looted=false": { "model": "cts:block/chest", "y": 180 },
+    "facing=west,looted=false": { "model": "cts:block/chest", "y": 270 },
+    "facing=north,looted=true": { "model": "cts:block/chest" },
+    "facing=east,looted=true": { "model": "cts:block/chest", "y": 90 },
+    "facing=south,looted=true": { "model": "cts:block/chest", "y": 180 },
+    "facing=west,looted=true": { "model": "cts:block/chest", "y": 270 }
+  }
+}

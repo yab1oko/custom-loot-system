@@ -1,0 +1,8 @@
+{
+  "parent": "cts:block/kitchen_drawer_single",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "1": "cts:block/drawer_cherry",
+    "particle": "cts:block/drawer_cherry"
+  }
+}

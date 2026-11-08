@@ -1,0 +1,50 @@
+{
+  "format_version": "1.9.0",
+  "ambientocclusion": false,
+  "credit": "Made with Blockbench",
+  "texture_size": [64, 64],
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "cts:block/toilet",
+    "1": "cts:block/dwater",
+    "particle": "cts:block/toilet"
+  },
+  "elements": [
+    {
+      "name": "lid",
+      "from": [3, 8, 4],
+      "to": [13, 9, 13],
+      "rotation": {
+        "angle": 0,
+        "axis": "x",
+        "origin": [7, 9, 5]
+      },
+      "faces": {
+        "north": {
+          "uv": [13.5, 1, 16, 1.25],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [13.75, 0.375, 16, 0.625],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [13.5, 0, 16, 0.25],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [13.75, 0.125, 16, 0.375],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [13.5, 0, 16, 2.25],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [13.5, 0, 16, 2.25],
+          "texture": "#0"
+        }
+      }
+    }
+  ]
+}

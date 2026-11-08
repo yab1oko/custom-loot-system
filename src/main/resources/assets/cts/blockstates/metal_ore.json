@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "broken=false": { "model": "cts:block/metal_ore" },
+    "broken=true": { "model": "cts:block/metal_ore_empty" }
+  }
+}

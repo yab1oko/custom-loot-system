@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,looted=false": { "model": "cts:block/laundry_basket" },
+    "facing=east,looted=false": { "model": "cts:block/laundry_basket", "y": 90 },
+    "facing=south,looted=false": { "model": "cts:block/laundry_basket", "y": 180 },
+    "facing=west,looted=false": { "model": "cts:block/laundry_basket", "y": 270 },
+    "facing=north,looted=true": { "model": "cts:block/laundry_basket_empty" },
+    "facing=east,looted=true": { "model": "cts:block/laundry_basket_empty", "y": 90 },
+    "facing=south,looted=true": { "model": "cts:block/laundry_basket_empty", "y": 180 },
+    "facing=west,looted=true": { "model": "cts:block/laundry_basket_empty", "y": 270 }
+  }
+}

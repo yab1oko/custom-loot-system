@@ -1,0 +1,8 @@
+{
+  "parent": "cts:block/dresser",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "3": "cts:block/dresser_birch",
+    "particle": "cts:block/dresser_birch"
+  }
+}

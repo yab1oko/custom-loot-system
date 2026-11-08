@@ -1,0 +1,54 @@
+{
+  "format_version": "1.9.0",
+  "ambientocclusion": true,
+  "credit": "Made with Blockbench",
+  "texture_size": [64, 64],
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "1": "cts:block/drawer_oak",
+    "particle": "cts:block/drawer_oak"
+  },
+  "elements": [
+    {
+      "from": [8, 0, 15],
+      "to": [16, 16, 16],
+      "rotation": {
+        "angle": 0,
+        "axis": "z",
+        "origin": [12, 16, 15]
+      },
+      "faces": {
+        "north": {
+          "uv": [7.75, 0, 11.75, 2],
+          "rotation": 270,
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [0, 0, 4, 0.25],
+          "rotation": 90,
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [7.75, 2, 11.75, 4],
+          "rotation": 90,
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [0, 0, 4, 0.25],
+          "rotation": 90,
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [2, 1, 2.25, 3],
+          "rotation": 90,
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [1.75, 1, 2, 3],
+          "rotation": 90,
+          "texture": "#1"
+        }
+      }
+    }
+  ]
+}

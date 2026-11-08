@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,looted=false": { "model": "cts:block/kitchen_drawer_single_spruce_body" },
+    "facing=east,looted=false": { "model": "cts:block/kitchen_drawer_single_spruce_body" },
+    "facing=south,looted=false": { "model": "cts:block/kitchen_drawer_single_spruce_body" },
+    "facing=west,looted=false": { "model": "cts:block/kitchen_drawer_single_spruce_body" },
+    "facing=north,looted=true": { "model": "cts:block/kitchen_drawer_single_spruce_body" },
+    "facing=east,looted=true": { "model": "cts:block/kitchen_drawer_single_spruce_body" },
+    "facing=south,looted=true": { "model": "cts:block/kitchen_drawer_single_spruce_body" },
+    "facing=west,looted=true": { "model": "cts:block/kitchen_drawer_single_spruce_body" }
+  }
+}

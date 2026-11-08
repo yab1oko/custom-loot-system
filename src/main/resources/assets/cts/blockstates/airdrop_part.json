@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "cts:block/airdrop" },
+    "facing=east": { "model": "cts:block/airdrop" },
+    "facing=south": { "model": "cts:block/airdrop" },
+    "facing=west": { "model": "cts:block/airdrop" }
+  }
+}

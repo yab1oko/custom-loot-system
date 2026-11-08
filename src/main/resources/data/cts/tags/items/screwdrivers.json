@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "immersiveengineering:screwdriver",
+      "required": false
+    },
+    {
+      "id": "cold_weapons:screwdriver",
+      "required": false
+    },
+    {
+      "id": "coldweapons:screwdriver",
+      "required": false
+    }
+  ]
+}

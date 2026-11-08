@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,broken=false": { "model": "cts:block/ventilation_grille" },
+    "facing=east,broken=false": { "model": "cts:block/ventilation_grille", "y": 90 },
+    "facing=south,broken=false": { "model": "cts:block/ventilation_grille", "y": 180 },
+    "facing=west,broken=false": { "model": "cts:block/ventilation_grille", "y": 270 },
+    "facing=north,broken=true": { "model": "cts:block/ventilation_grille_empty" },
+    "facing=east,broken=true": { "model": "cts:block/ventilation_grille_empty" },
+    "facing=south,broken=true": { "model": "cts:block/ventilation_grille_empty" },
+    "facing=west,broken=true": { "model": "cts:block/ventilation_grille_empty" }
+  }
+}

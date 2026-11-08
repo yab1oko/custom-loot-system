@@ -1,0 +1,5 @@
+{
+  "multipart": [
+    { "apply": { "model": "cts:block/shelving_part" } }
+  ]
+}

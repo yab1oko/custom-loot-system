@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "name": "axe_chop",
+  "emote": {
+    "beginTick": 0,
+    "endTick": 14,
+    "stopTick": 14,
+    "isLoop": true,
+    "returnTick": 0,
+    "nsfw": false,
+    "degrees": true,
+    "moves": [
+      {
+        "tick": 0,
+        "easing": "INOUTSINE",
+        "rightArm": { "pitch": -55, "yaw": 70, "roll": 0 },
+        "leftArm": { "pitch": -45, "yaw": 45, "roll": 40 },
+        "rightItem": { "roll": -90, "y": -1.5 }
+      },
+      {
+        "tick": 4,
+        "easing": "INOUTSINE",
+        "rightArm": { "pitch": -55, "yaw": 85, "roll": 0 },
+        "leftArm": { "pitch": -45, "yaw": 60, "roll": 40 },
+        "rightItem": { "roll": -90, "y": -1.5 }
+      },
+      {
+        "tick": 7,
+        "easing": "OUTCUBIC",
+        "rightArm": { "pitch": -55, "yaw": -45, "roll": 0 },
+        "leftArm": { "pitch": -45, "yaw": -25, "roll": 40 },
+        "rightItem": { "roll": -90, "y": -1.5 }
+      },
+      {
+        "tick": 10,
+        "easing": "INOUTSINE",
+        "rightArm": { "pitch": -55, "yaw": -50, "roll": 0 },
+        "leftArm": { "pitch": -45, "yaw": -30, "roll": 40 },
+        "rightItem": { "roll": -90, "y": -1.5 }
+      },
+      {
+        "tick": 14,
+        "easing": "INOUTSINE",
+        "rightArm": { "pitch": -55, "yaw": 70, "roll": 0 },
+        "leftArm": { "pitch": -45, "yaw": 45, "roll": 40 },
+        "rightItem": { "roll": -90, "y": -1.5 }
+      }
+    ]
+  }
+}

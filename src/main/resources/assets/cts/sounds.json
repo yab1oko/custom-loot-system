@@ -1,0 +1,31 @@
+{
+  "wood_sound": { "sounds": ["cts:wood_sound"] },
+  "zip": { "sounds": ["cts:zip"] },
+  "canstash": { "sounds": ["cts:canstash"] },
+  "boxes": { "sounds": ["cts:boxes"] },
+  "cloth": { "sounds": ["cts:cloth"] },
+  "toolbox": { "sounds": ["cts:toolbox"] },
+  "waste_drum": { "sounds": ["cts:waste_drum"] },
+  "safe": { "sounds": ["cts:safe"] },
+  "metal_scrap": { "sounds": ["cts:metal_scrap"] },
+  "plastic": { "sounds": ["cts:plastic"] },
+  "paper": { "sounds": ["cts:paper"] },
+  "dresser": { "sounds": ["cts:dresser"] },
+  "drawer": { "sounds": ["cts:drawer"] },
+  "cache": { "sounds": ["cts:cache"] },
+  "nest": { "sounds": ["cts:nest"] },
+  "shelving": { "sounds": ["cts:shelving"] },
+  "cash_register": { "sounds": ["cts:cash_register"] },
+  "toilet": { "sounds": ["cts:toilet"] },
+  "plastic_lid": { "sounds": ["cts:plastic_lid"] },
+  "microwave": { "sounds": ["cts:microwave"] },
+  "open": { "sounds": ["cts:open"] },
+  "searching": { "sounds": ["cts:searching"] },
+  "airdrop": {
+    "sounds": [
+      { "name": "cts:airdrop", "stream": true }
+    ]
+  },
+  "screwdriver": { "sounds": ["cts:screwdriver"] },
+  "vent_open": { "sounds": ["cts:vent_open"] }
+}

@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "style=0,facing=north": { "model": "cts:block/tree_leaves", "y": 0 },
+    "style=0,facing=east":  { "model": "cts:block/tree_leaves", "y": 90 },
+    "style=0,facing=south": { "model": "cts:block/tree_leaves", "y": 180 },
+    "style=0,facing=west":  { "model": "cts:block/tree_leaves", "y": 270 },
+    "style=1,facing=north": { "model": "cts:block/tree_leaves_alt", "y": 0 },
+    "style=1,facing=east":  { "model": "cts:block/tree_leaves_alt", "y": 90 },
+    "style=1,facing=south": { "model": "cts:block/tree_leaves_alt", "y": 180 },
+    "style=1,facing=west":  { "model": "cts:block/tree_leaves_alt", "y": 270 }
+  }
+}
