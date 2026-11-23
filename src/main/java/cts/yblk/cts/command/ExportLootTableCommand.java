@@ -47,7 +47,7 @@ public class ExportLootTableCommand {
                         .executes(context -> embed(context.getSource(), StringArgumentType.getString(context, "table")))));
     }
 
-    private static CompletableFuture<Suggestions> suggest(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
+    static CompletableFuture<Suggestions> suggest(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
         String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
         if (remaining.isEmpty() || "all".startsWith(remaining)) {
             builder.suggest("all");
@@ -61,7 +61,7 @@ public class ExportLootTableCommand {
         return builder.buildFuture();
     }
 
-    private static int embed(CommandSourceStack source, String table) {
+    static int embed(CommandSourceStack source, String table) {
         MinecraftServer server = source.getServer();
         try {
             Path pack = server.getWorldPath(LevelResource.DATAPACK_DIR).resolve(Cts.MODID);
