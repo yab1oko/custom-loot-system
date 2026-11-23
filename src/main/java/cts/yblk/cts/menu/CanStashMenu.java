@@ -54,10 +54,13 @@ public class CanStashMenu extends AbstractContainerMenu {
                 return 3;
             }
         });
+        if (!inventory.player.level().isClientSide) {
+            stash.onMenuOpened();
+        }
 
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
-                this.addSlot(new SlotItemHandler(stash.getContents(), col + row * 9, 8 + col * 18, 18 + row * 18));
+                this.addSlot(new SlotItemHandler(stash.contentsFor(inventory.player), col + row * 9, 8 + col * 18, 18 + row * 18));
             }
         }
         for (int row = 0; row < 3; ++row) {
@@ -87,6 +90,14 @@ public class CanStashMenu extends AbstractContainerMenu {
 
     public boolean isAirdrop() {
         return stash.isAirdropArmed();
+    }
+
+    @Override
+    public void removed(Player player) {
+        super.removed(player);
+        if (player.level() != null && !player.level().isClientSide) {
+            stash.onMenuClosed();
+        }
     }
 
     @Override

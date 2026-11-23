@@ -36,6 +36,8 @@ public class CanStashConfigScreen extends AbstractContainerScreen<CanStashConfig
     private Button openModeButton;
     private CanStashBlockEntity.Mode mode;
     private boolean requiresTool;
+    private boolean perPlayer;
+    private CanStashBlockEntity.RefillMode refillMode;
     private boolean sentOnClose;
     private final ItemEntryEditor editor = new ItemEntryEditor();
     private final LootTableSuggestions lootSuggestions = new LootTableSuggestions();
@@ -54,6 +56,8 @@ public class CanStashConfigScreen extends AbstractContainerScreen<CanStashConfig
         CanStashBlockEntity stash = menu.getStash();
         this.mode = stash.getMode();
         this.requiresTool = stash.requiresTool();
+        this.perPlayer = stash.isPerPlayerLoot();
+        this.refillMode = stash.getRefillMode();
         this.sentOnClose = false;
 
         addRenderableWidget(ThemedButton.create(modeLabel(), button -> {
@@ -97,6 +101,25 @@ public class CanStashConfigScreen extends AbstractContainerScreen<CanStashConfig
             ChestLibraryClient.openSavePrompt(stash.getBlockPos(), stash.getDisplayName().getString());
         }).bounds(leftPos + imageWidth - 78, topPos + 113 + CanStashConfigMenu.TOP_EXTRA, 70, 16).build());
 
+        addRenderableWidget(ThemedButton.create(perPlayerLabel(), button -> {
+            perPlayer = !perPlayer;
+            button.setMessage(perPlayerLabel());
+            sendSettings();
+        }).bounds(leftPos + 8, topPos + 133 + CanStashConfigMenu.TOP_EXTRA, 100, 16).build());
+
+        addRenderableWidget(ThemedButton.create(refillLabel(), button -> {
+            refillMode = refillMode == CanStashBlockEntity.RefillMode.REPLACE
+                    ? CanStashBlockEntity.RefillMode.WHEN_EMPTY
+                    : CanStashBlockEntity.RefillMode.REPLACE;
+            button.setMessage(refillLabel());
+            sendSettings();
+        }).bounds(leftPos + 8, topPos + 151 + CanStashConfigMenu.TOP_EXTRA, 110, 16).build());
+
+        addRenderableWidget(ThemedButton.create(Component.translatable("gui.cts.refill_now"), button -> {
+            sendSettings();
+            ModNetwork.CHANNEL.sendToServer(new cts.yblk.cts.network.RefillContainerPacket(stash.getBlockPos()));
+        }).bounds(leftPos + imageWidth - 78, topPos + 151 + CanStashConfigMenu.TOP_EXTRA, 70, 16).build());
+
         updateModeWidgets();
     }
 
@@ -108,6 +131,15 @@ public class CanStashConfigScreen extends AbstractContainerScreen<CanStashConfig
 
     private Component openModeLabel() {
         return Component.translatable(requiresTool ? "gui.cts.open_tool" : "gui.cts.open_normal");
+    }
+
+    private Component perPlayerLabel() {
+        return Component.translatable(perPlayer ? "gui.cts.per_player.on" : "gui.cts.per_player.off");
+    }
+
+    private Component refillLabel() {
+        return Component.translatable(refillMode == CanStashBlockEntity.RefillMode.WHEN_EMPTY
+                ? "gui.cts.refill.when_empty" : "gui.cts.refill.replace");
     }
 
     private boolean isItemMode() {
@@ -172,7 +204,9 @@ public class CanStashConfigScreen extends AbstractContainerScreen<CanStashConfig
                 lootTableBox.getValue(),
                 seconds,
                 openSeconds,
-                requiresTool
+                requiresTool,
+                perPlayer,
+                refillMode
         ));
     }
 

@@ -15,9 +15,9 @@ import cts.yblk.cts.blockentity.CanStashBlockEntity;
 import cts.yblk.cts.registry.ModMenus;
 
 public class CanStashConfigMenu extends AbstractContainerMenu {
-    public static final int SETTINGS_PIXELS = 82;
+    public static final int SETTINGS_PIXELS = 130;
     public static final int TOP_EXTRA = 10;
-    public static final int TOOL_SLOT_Y = 132 + TOP_EXTRA;
+    public static final int TOOL_SLOT_Y = 188;
 
     private final CanStashBlockEntity stash;
 

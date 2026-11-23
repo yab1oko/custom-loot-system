@@ -33,6 +33,7 @@ public class LootPlateScreen extends AbstractContainerScreen<LootPlateMenu> {
     private EditBox lootTableBox;
     private EditBox respawnBox;
     private LootPlateBlockEntity.Mode mode;
+    private boolean perPlayer;
     private boolean sentOnClose;
     private final ItemEntryEditor editor = new ItemEntryEditor();
     private final LootTableSuggestions lootSuggestions = new LootTableSuggestions();
@@ -50,6 +51,7 @@ public class LootPlateScreen extends AbstractContainerScreen<LootPlateMenu> {
         super.init();
         LootPlateBlockEntity plate = menu.getPlate();
         this.mode = plate.getMode();
+        this.perPlayer = plate.isPerPlayerLoot();
         this.sentOnClose = false;
 
         addRenderableWidget(ThemedButton.create(modeLabel(), button -> {
@@ -74,6 +76,17 @@ public class LootPlateScreen extends AbstractContainerScreen<LootPlateMenu> {
         respawnBox.setValue(Integer.toString(plate.getRespawnSeconds()));
         respawnBox.setFilter(text -> text.isEmpty() || text.chars().allMatch(Character::isDigit));
         addRenderableWidget(respawnBox);
+
+        addRenderableWidget(ThemedButton.create(Component.translatable(perPlayer ? "gui.cts.per_player.on" : "gui.cts.per_player.off"), button -> {
+            perPlayer = !perPlayer;
+            button.setMessage(Component.translatable(perPlayer ? "gui.cts.per_player.on" : "gui.cts.per_player.off"));
+            sendSettings();
+        }).bounds(leftPos + 8, topPos + 92 + LootPlateMenu.TOP_EXTRA, 110, 16).build());
+
+        addRenderableWidget(ThemedButton.create(Component.translatable("gui.cts.refill_now"), button -> {
+            sendSettings();
+            ModNetwork.CHANNEL.sendToServer(new cts.yblk.cts.network.RefillContainerPacket(plate.getBlockPos()));
+        }).bounds(leftPos + imageWidth - 78, topPos + 92 + LootPlateMenu.TOP_EXTRA, 70, 16).build());
 
         updateModeWidgets();
     }
@@ -136,7 +149,8 @@ public class LootPlateScreen extends AbstractContainerScreen<LootPlateMenu> {
                 menu.getPlate().getBlockPos(),
                 mode,
                 lootTableBox.getValue(),
-                seconds
+                seconds,
+                perPlayer
         ));
     }
 

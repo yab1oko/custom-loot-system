@@ -14,12 +14,14 @@ public class UpdateLootPlatePacket {
     private final LootPlateBlockEntity.Mode mode;
     private final String lootTable;
     private final int respawnSeconds;
+    private final boolean perPlayer;
 
-    public UpdateLootPlatePacket(BlockPos pos, LootPlateBlockEntity.Mode mode, String lootTable, int respawnSeconds) {
+    public UpdateLootPlatePacket(BlockPos pos, LootPlateBlockEntity.Mode mode, String lootTable, int respawnSeconds, boolean perPlayer) {
         this.pos = pos;
         this.mode = mode;
         this.lootTable = lootTable;
         this.respawnSeconds = respawnSeconds;
+        this.perPlayer = perPlayer;
     }
 
     public static void encode(UpdateLootPlatePacket packet, FriendlyByteBuf buf) {
@@ -27,10 +29,11 @@ public class UpdateLootPlatePacket {
         buf.writeEnum(packet.mode);
         buf.writeUtf(packet.lootTable, 256);
         buf.writeVarInt(packet.respawnSeconds);
+        buf.writeBoolean(packet.perPlayer);
     }
 
     public static UpdateLootPlatePacket decode(FriendlyByteBuf buf) {
-        return new UpdateLootPlatePacket(buf.readBlockPos(), buf.readEnum(LootPlateBlockEntity.Mode.class), buf.readUtf(256), buf.readVarInt());
+        return new UpdateLootPlatePacket(buf.readBlockPos(), buf.readEnum(LootPlateBlockEntity.Mode.class), buf.readUtf(256), buf.readVarInt(), buf.readBoolean());
     }
 
     public static void handle(UpdateLootPlatePacket packet, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -44,7 +47,7 @@ public class UpdateLootPlatePacket {
                 return;
             }
             if (player.level().getBlockEntity(packet.pos) instanceof LootPlateBlockEntity plate) {
-                plate.applySettings(packet.mode, packet.lootTable, packet.respawnSeconds);
+                plate.applySettings(packet.mode, packet.lootTable, packet.respawnSeconds, packet.perPlayer);
             }
         });
         context.setPacketHandled(true);

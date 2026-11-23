@@ -6,7 +6,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import cts.yblk.cts.Cts;
 
 public class ModNetwork {
-    private static final String PROTOCOL = "22";
+    private static final String PROTOCOL = "23";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(Cts.MODID, "main"),
             () -> PROTOCOL,
@@ -132,5 +132,9 @@ public class ModNetwork {
                 SaveChestToLibraryPacket::encode,
                 SaveChestToLibraryPacket::decode,
                 SaveChestToLibraryPacket::handle);
+        CHANNEL.registerMessage(id++, RefillContainerPacket.class,
+                RefillContainerPacket::encode,
+                RefillContainerPacket::decode,
+                RefillContainerPacket::handle);
     }
 }

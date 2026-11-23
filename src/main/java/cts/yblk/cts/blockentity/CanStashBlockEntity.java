@@ -3,6 +3,8 @@ package cts.yblk.cts.blockentity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -49,12 +51,23 @@ import cts.yblk.cts.registry.ModSounds;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
     public enum Mode {
         ITEMS,
         LOOT_TABLE
+    }
+
+    /** How a container replaces leftovers when its respawn timer ends. */
+    public enum RefillMode {
+        /** Clear leftovers and roll again. This is the historical behavior. */
+        REPLACE,
+        /** Wait until that inventory is empty, then roll. */
+        WHEN_EMPTY
     }
 
     public static final int SLOT_COUNT = 27;
@@ -103,7 +116,7 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
         @Override
         protected void onContentsChanged(int slot) {
             if (!filling && level != null && !level.isClientSide) {
-                if (cooldownTicks <= 0 && respawnSeconds > 0) {
+                if (!perPlayerLoot && cooldownTicks <= 0 && respawnSeconds > 0) {
                     cooldownTicks = respawnSeconds * 20;
                 }
                 if (airdropArmed && getBlockState().getBlock() instanceof cts.yblk.cts.block.AirdropBlock) {
@@ -135,6 +148,16 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
     private int respawnSeconds = DEFAULT_RESPAWN_SECONDS;
     private int searchSeconds = DEFAULT_SEARCH_SECONDS;
     private int cooldownTicks;
+    /** Per container. Off keeps one shared inventory. Airdrops ignore this and stay shared. */
+    private boolean perPlayerLoot;
+    private RefillMode refillMode = RefillMode.REPLACE;
+    private boolean refillPending;
+    private int openMenus;
+    private boolean refillDeferred;
+    private boolean deferredSound;
+    @Nullable
+    private UUID deferredPlayer;
+    private final Map<UUID, PlayerStock> playerStocks = new LinkedHashMap<>();
 
     /** Client-only interpolated lid openness for chest-style renderers (0 closed .. 1 open). */
     private float lidOpenness;
@@ -325,6 +348,87 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
         return contents;
     }
 
+    /** Shared contents, or this player's own stock when player-bound is on. */
+    public ItemStackHandler contentsFor(Player player) {
+        if (!perPlayerLoot || airdropArmed || player == null) {
+            return contents;
+        }
+        return playerStock(player.getUUID()).contents;
+    }
+
+    public boolean isPerPlayerLoot() {
+        return perPlayerLoot && !airdropArmed;
+    }
+
+    public RefillMode getRefillMode() {
+        return refillMode;
+    }
+
+    /**
+     * Re-roll now. Player-bound chests re-roll every stored player.
+     * If nobody has opened one yet, the actor gets the first stock.
+     * Airdrops are one-shot and are left alone.
+     */
+    public void forceRefill(@Nullable Player actor) {
+        if (airdropArmed || level == null || level.isClientSide) {
+            return;
+        }
+        if (perPlayerLoot) {
+            if (playerStocks.isEmpty()) {
+                if (actor != null) {
+                    tryStockRefill(playerStock(actor.getUUID()), actor, true);
+                }
+                syncToClient();
+                return;
+            }
+            for (PlayerStock stock : playerStocks.values()) {
+                stock.refillPending = false;
+                generateInto(stock.contents, actor, true, false);
+                stock.cooldownTicks = 0;
+                stock.touched = true;
+            }
+            syncToClient();
+            return;
+        }
+        generateInto(contents, actor, true, true);
+        cooldownTicks = 0;
+        refillPending = false;
+        syncToClient();
+    }
+
+    public void onMenuOpened() {
+        if (level != null && !level.isClientSide) {
+            openMenus++;
+        }
+    }
+
+    public void onMenuClosed() {
+        if (level == null || level.isClientSide) {
+            return;
+        }
+        openMenus = Math.max(0, openMenus - 1);
+        if (openMenus == 0 && refillDeferred) {
+            refillDeferred = false;
+            Player player = null;
+            if (deferredPlayer != null && level instanceof ServerLevel server) {
+                player = server.getPlayerByUUID(deferredPlayer);
+            }
+            deferredPlayer = null;
+            boolean sound = deferredSound;
+            if (perPlayerLoot && !airdropArmed) {
+                if (player != null) {
+                    tryStockRefill(playerStock(player.getUUID()), player, sound);
+                }
+            } else {
+                trySharedRefill(player, sound);
+            }
+        }
+    }
+
+    private PlayerStock playerStock(UUID id) {
+        return playerStocks.computeIfAbsent(id, ignored -> new PlayerStock());
+    }
+
     public ItemStackHandler getTools() {
         return tools;
     }
@@ -488,11 +592,20 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     public void applySettings(Mode newMode, String lootTable, int seconds, int openSeconds, boolean toolRequired) {
+        applySettings(newMode, lootTable, seconds, openSeconds, toolRequired, this.perPlayerLoot, this.refillMode);
+    }
+
+    public void applySettings(Mode newMode, String lootTable, int seconds, int openSeconds, boolean toolRequired,
+                              boolean perPlayer, RefillMode refill) {
         this.mode = newMode;
         this.lootTableId = newMode == Mode.LOOT_TABLE ? sanitizeLootTable(lootTable) : this.lootTableId;
         this.respawnSeconds = Math.max(0, Math.min(MAX_RESPAWN_SECONDS, seconds));
         this.searchSeconds = Math.max(0, Math.min(MAX_SEARCH_SECONDS, openSeconds));
         this.requiresTool = toolRequired;
+        if (!airdropArmed) {
+            this.perPlayerLoot = perPlayer;
+        }
+        this.refillMode = refill == null ? RefillMode.REPLACE : refill;
         if (isEmpty(contents) && cooldownTicks > 0) {
             cooldownTicks = respawnSeconds <= 0 ? 0 : respawnSeconds * 20;
         }
@@ -508,7 +621,8 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
         this.cooldownTicks = 0;
         this.requiresTool = false;
         this.searchSeconds = AIRDROP_SEARCH_SECONDS;
-        generateContents();
+        this.perPlayerLoot = false;
+        generateInto(contents, null, false, true);
         this.airdropArmed = !isEmpty(contents);
         this.airdropPartiallyLooted = false;
         this.airdropInitialItemCount = countItems(contents);
@@ -522,7 +636,14 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
         if (!player.getAbilities().instabuild && !consumeTool(player)) {
             return;
         }
-        refillIfReady();
+        if (perPlayerLoot && !airdropArmed) {
+            PlayerStock stock = playerStock(player.getUUID());
+            if (!stock.touched || (isEmpty(stock.contents) && stock.cooldownTicks <= 0 && respawnSeconds > 0)) {
+                tryStockRefill(stock, player, false);
+            }
+        } else {
+            refillIfReady(player);
+        }
         setLooted(true);
         if (level != null) {
             level.playSound(null, worldPosition, openSound(), SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -632,13 +753,35 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, CanStashBlockEntity stash) {
-        if (stash.cooldownTicks > 0) {
-            stash.cooldownTicks--;
-            if (stash.cooldownTicks == 0) {
-                stash.generateContents();
+        if (!stash.perPlayerLoot || stash.airdropArmed) {
+            if (stash.cooldownTicks > 0) {
+                stash.cooldownTicks--;
+                if (stash.cooldownTicks == 0) {
+                    stash.trySharedRefill(null, true);
+                    stash.syncToClient();
+                } else if (stash.cooldownTicks % 20 == 0) {
+                    stash.setChanged();
+                }
+            } else if (stash.refillPending && isEmpty(stash.contents)) {
+                stash.trySharedRefill(null, true);
                 stash.syncToClient();
-            } else if (stash.cooldownTicks % 20 == 0) {
-                stash.setChanged();
+            }
+        } else {
+            boolean changed = false;
+            for (PlayerStock stock : stash.playerStocks.values()) {
+                if (stock.cooldownTicks > 0) {
+                    stock.cooldownTicks--;
+                    if (stock.cooldownTicks == 0) {
+                        stash.tryStockRefill(stock, null, true);
+                        changed = true;
+                    }
+                } else if (stock.refillPending && isEmpty(stock.contents)) {
+                    stash.tryStockRefill(stock, null, true);
+                    changed = true;
+                }
+            }
+            if (changed) {
+                stash.syncToClient();
             }
         }
         if (!level.isClientSide && state.is(ModBlocks.AIRDROP.get()) && stash.airdropArmed
@@ -673,48 +816,92 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
         }
     }
 
-    private void refillIfReady() {
-        // One-shot airdrop: loot is rolled once on land, never again
-        if (airdropArmed) {
+    private void refillIfReady(Player opener) {
+        if (airdropArmed || perPlayerLoot) {
             return;
         }
-        if (!isConfigured() || cooldownTicks > 0) {
+        if (!isConfigured() || cooldownTicks > 0 || respawnSeconds <= 0 || !isEmpty(contents)) {
             return;
         }
-        if (!isEmpty(contents)) {
-            return;
-        }
-        if (respawnSeconds <= 0) {
-            return;
-        }
-        generateContents();
+        trySharedRefill(opener, false);
     }
 
-    private void generateContents() {
+    private void trySharedRefill(@Nullable Player opener, boolean sound) {
+        if (airdropArmed || !isConfigured()) {
+            return;
+        }
+        if (refillMode == RefillMode.WHEN_EMPTY && !isEmpty(contents)) {
+            refillPending = true;
+            cooldownTicks = 0;
+            setChanged();
+            return;
+        }
+        generateInto(contents, opener, sound, true);
+        cooldownTicks = 0;
+        refillPending = false;
+        if (mode == Mode.ITEMS && isEmpty(contents) && hasTemplateItems() && respawnSeconds > 0) {
+            cooldownTicks = respawnSeconds * 20;
+        }
+    }
+
+    private void tryStockRefill(PlayerStock stock, @Nullable Player opener, boolean sound) {
         if (!isConfigured()) {
+            return;
+        }
+        if (refillMode == RefillMode.WHEN_EMPTY && !isEmpty(stock.contents)) {
+            stock.refillPending = true;
+            stock.cooldownTicks = 0;
+            setChanged();
+            return;
+        }
+        generateInto(stock.contents, opener, sound, false);
+        stock.cooldownTicks = 0;
+        stock.refillPending = false;
+        stock.touched = true;
+        if (mode == Mode.ITEMS && isEmpty(stock.contents) && hasTemplateItems() && respawnSeconds > 0) {
+            stock.cooldownTicks = respawnSeconds * 20;
+        }
+    }
+
+    private void generateInto(ItemStackHandler dest, @Nullable Player opener, boolean sound, boolean sharedAppearance) {
+        if (!isConfigured()) {
+            return;
+        }
+        if (level != null && !level.isClientSide && openMenus > 0) {
+            refillDeferred = true;
+            deferredSound = sound;
+            deferredPlayer = opener == null ? null : opener.getUUID();
             return;
         }
         filling = true;
         try {
             if (mode == Mode.LOOT_TABLE) {
-                fillFromLootTable();
+                fillFromLootTable(dest, opener);
             } else {
-                fillRandomTemplates();
+                fillRandomTemplates(dest);
             }
         } finally {
             filling = false;
         }
-        cooldownTicks = 0;
-        if (mode == Mode.ITEMS && isEmpty(contents) && hasTemplateItems() && respawnSeconds > 0) {
-            cooldownTicks = respawnSeconds * 20;
+        if (sharedAppearance) {
+            refreshAppearance();
         }
-        refreshAppearance();
+        if (sound) {
+            playRefillSound();
+        }
         setChanged();
     }
 
-    private void fillRandomTemplates() {
+    private void playRefillSound() {
+        if (!CtsConfig.refillSound() || level == null || level.isClientSide) {
+            return;
+        }
+        level.playSound(null, worldPosition, SoundEvents.BUNDLE_INSERT, SoundSource.BLOCKS, 0.35F, 0.9F);
+    }
+
+    private void fillRandomTemplates(ItemStackHandler dest) {
         for (int i = 0; i < SLOT_COUNT; i++) {
-            contents.setStackInSlot(i, ItemStack.EMPTY);
+            dest.setStackInSlot(i, ItemStack.EMPTY);
         }
         if (level == null) {
             return;
@@ -746,7 +933,7 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
                     }
                     ItemStack one = new ItemStack(item);
                     if (one.isDamageableItem()) {
-                        contents.setStackInSlot(slots.get(cursor++), SpawnChance.spawnStack(one, level.random, 1, 1, true, randomEnchant[templateSlot]));
+                        dest.setStackInSlot(slots.get(cursor++), SpawnChance.spawnStack(one, level.random, 1, 1, true, randomEnchant[templateSlot]));
                         continue;
                     }
                     int total = SpawnChance.rollCount(level.random, countMin[templateSlot], countMax[templateSlot]);
@@ -754,7 +941,7 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
                     if (randomEnchant[templateSlot]) {
                         SpawnChance.applyRandomEnchantment(one, level.random);
                     }
-                    contents.setStackInSlot(slots.get(cursor++), one);
+                    dest.setStackInSlot(slots.get(cursor++), one);
                 }
                 continue;
             }
@@ -763,7 +950,7 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
                 continue;
             }
             if (concrete.isDamageableItem()) {
-                contents.setStackInSlot(slots.get(cursor++), SpawnChance.spawnStack(concrete, level.random, 1, 1, randomDamage[templateSlot], randomEnchant[templateSlot]));
+                dest.setStackInSlot(slots.get(cursor++), SpawnChance.spawnStack(concrete, level.random, 1, 1, randomDamage[templateSlot], randomEnchant[templateSlot]));
                 continue;
             }
             int total = SpawnChance.rollCount(level.random, countMin[templateSlot], countMax[templateSlot]);
@@ -776,7 +963,7 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
                 if (randomEnchant[templateSlot]) {
                     SpawnChance.applyRandomEnchantment(stack, level.random);
                 }
-                contents.setStackInSlot(slots.get(cursor++), stack);
+                dest.setStackInSlot(slots.get(cursor++), stack);
             }
         }
     }
@@ -788,9 +975,9 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
         }
     }
 
-    private void fillFromLootTable() {
+    private void fillFromLootTable(ItemStackHandler dest, @Nullable Player opener) {
         for (int i = 0; i < SLOT_COUNT; i++) {
-            contents.setStackInSlot(i, ItemStack.EMPTY);
+            dest.setStackInSlot(i, ItemStack.EMPTY);
         }
         if (lootTableId.isBlank() || !(level instanceof ServerLevel serverLevel)) {
             return;
@@ -803,9 +990,13 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
         if (table == LootTable.EMPTY) {
             return;
         }
-        LootParams params = new LootParams.Builder(serverLevel)
-                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(worldPosition))
-                .create(LootContextParamSets.CHEST);
+        LootParams.Builder loot = new LootParams.Builder(serverLevel)
+                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(worldPosition));
+        if (opener != null) {
+            loot.withParameter(LootContextParams.THIS_ENTITY, opener);
+            loot.withLuck(opener.getLuck());
+        }
+        LootParams params = loot.create(LootContextParamSets.CHEST);
         List<ItemStack> stacks = table.getRandomItems(params);
         List<ItemStack> options = new ArrayList<>();
         for (ItemStack stack : stacks) {
@@ -825,7 +1016,7 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
                 break;
             }
             if (stack.getCount() <= 1 || stack.isDamageableItem()) {
-                contents.setStackInSlot(slots.get(cursor++), stack.copy());
+                dest.setStackInSlot(slots.get(cursor++), stack.copy());
                 continue;
             }
             int maxPile = Math.max(1, stack.getMaxStackSize());
@@ -834,7 +1025,7 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
                 while (left > 0 && cursor < slots.size()) {
                     ItemStack part = stack.copy();
                     part.setCount(Math.min(left, maxPile));
-                    contents.setStackInSlot(slots.get(cursor++), part);
+                    dest.setStackInSlot(slots.get(cursor++), part);
                     left -= part.getCount();
                 }
             }
@@ -894,6 +1085,8 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
         tag.putInt("RespawnSeconds", respawnSeconds);
         tag.putInt("SearchSeconds", searchSeconds);
         tag.putBoolean("RequiresTool", requiresTool);
+        tag.putBoolean("PerPlayer", perPlayerLoot);
+        tag.putString("RefillMode", refillMode.name());
         tag.put("Tools", tools.serializeNBT());
         BlockItem.setBlockEntityData(stack, getType(), tag);
     }
@@ -913,8 +1106,22 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
         tag.putInt("RespawnSeconds", respawnSeconds);
         tag.putInt("SearchSeconds", searchSeconds);
         tag.putBoolean("RequiresTool", requiresTool);
+        tag.putBoolean("PerPlayer", perPlayerLoot);
+        tag.putString("RefillMode", refillMode.name());
+        tag.putBoolean("RefillPending", refillPending);
         tag.put("Tools", tools.serializeNBT());
         tag.putInt("Cooldown", cooldownTicks);
+        ListTag players = new ListTag();
+        for (Map.Entry<UUID, PlayerStock> entry : playerStocks.entrySet()) {
+            CompoundTag playerTag = new CompoundTag();
+            playerTag.putUUID("Id", entry.getKey());
+            playerTag.put("Contents", entry.getValue().contents.serializeNBT());
+            playerTag.putInt("Cooldown", entry.getValue().cooldownTicks);
+            playerTag.putBoolean("Pending", entry.getValue().refillPending);
+            playerTag.putBoolean("Touched", entry.getValue().touched);
+            players.add(playerTag);
+        }
+        tag.put("PlayerLoot", players);
         tag.putBoolean("AirdropArmed", airdropArmed);
         tag.putInt("AirdropDespawnTicks", airdropDespawnTicks);
         tag.putBoolean("AirdropPartiallyLooted", airdropPartiallyLooted);
@@ -947,6 +1154,36 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
                 : CtsConfig.defaultLootRespawnSeconds();
         searchSeconds = tag.contains("SearchSeconds") ? tag.getInt("SearchSeconds") : defaultSearchSeconds(getBlockState());
         requiresTool = tag.getBoolean("RequiresTool");
+        perPlayerLoot = tag.getBoolean("PerPlayer");
+        refillPending = tag.getBoolean("RefillPending");
+        if (tag.contains("RefillMode", Tag.TAG_STRING)) {
+            try {
+                refillMode = RefillMode.valueOf(tag.getString("RefillMode"));
+            } catch (IllegalArgumentException ignored) {
+                refillMode = RefillMode.REPLACE;
+            }
+        } else {
+            refillMode = RefillMode.REPLACE;
+        }
+        playerStocks.clear();
+        if (tag.contains("PlayerLoot", Tag.TAG_LIST)) {
+            ListTag players = tag.getList("PlayerLoot", Tag.TAG_COMPOUND);
+            for (int i = 0; i < players.size(); i++) {
+                CompoundTag playerTag = players.getCompound(i);
+                if (!playerTag.hasUUID("Id")) {
+                    continue;
+                }
+                PlayerStock stock = playerStock(playerTag.getUUID("Id"));
+                if (playerTag.contains("Contents")) {
+                    filling = true;
+                    stock.contents.deserializeNBT(playerTag.getCompound("Contents"));
+                    filling = false;
+                }
+                stock.cooldownTicks = playerTag.getInt("Cooldown");
+                stock.refillPending = playerTag.getBoolean("Pending");
+                stock.touched = playerTag.getBoolean("Touched");
+            }
+        }
         if (tag.contains("Tools")) {
             tools.deserializeNBT(tag.getCompound("Tools"));
         }
@@ -1041,6 +1278,30 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
         CompoundTag tag = pkt.getTag();
         if (tag != null) {
             load(tag);
+        }
+    }
+
+    /**
+     * One player's leftovers. Old worlds have no map: the shared inventory stays
+     * as a legacy snapshot and is not copied into the first player.
+     */
+    private final class PlayerStock {
+        private final ItemStackHandler contents = new ItemStackHandler(SLOT_COUNT) {
+            @Override
+            protected void onContentsChanged(int slot) {
+                if (!filling && level != null && !level.isClientSide) {
+                    if (cooldownTicks <= 0 && respawnSeconds > 0 && !isEmpty(this)) {
+                        cooldownTicks = respawnSeconds * 20;
+                    }
+                }
+                setChanged();
+            }
+        };
+        private int cooldownTicks;
+        private boolean refillPending;
+        private boolean touched;
+
+        private PlayerStock() {
         }
     }
 }

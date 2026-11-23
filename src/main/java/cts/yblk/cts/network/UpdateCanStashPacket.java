@@ -16,14 +16,18 @@ public class UpdateCanStashPacket {
     private final int respawnSeconds;
     private final int searchSeconds;
     private final boolean requiresTool;
+    private final boolean perPlayer;
+    private final CanStashBlockEntity.RefillMode refillMode;
 
-    public UpdateCanStashPacket(BlockPos pos, CanStashBlockEntity.Mode mode, String lootTable, int respawnSeconds, int searchSeconds, boolean requiresTool) {
+    public UpdateCanStashPacket(BlockPos pos, CanStashBlockEntity.Mode mode, String lootTable, int respawnSeconds, int searchSeconds, boolean requiresTool, boolean perPlayer, CanStashBlockEntity.RefillMode refillMode) {
         this.pos = pos;
         this.mode = mode;
         this.lootTable = lootTable;
         this.respawnSeconds = respawnSeconds;
         this.searchSeconds = searchSeconds;
         this.requiresTool = requiresTool;
+        this.perPlayer = perPlayer;
+        this.refillMode = refillMode == null ? CanStashBlockEntity.RefillMode.REPLACE : refillMode;
     }
 
     public static void encode(UpdateCanStashPacket packet, FriendlyByteBuf buf) {
@@ -33,10 +37,12 @@ public class UpdateCanStashPacket {
         buf.writeVarInt(packet.respawnSeconds);
         buf.writeVarInt(packet.searchSeconds);
         buf.writeBoolean(packet.requiresTool);
+        buf.writeBoolean(packet.perPlayer);
+        buf.writeEnum(packet.refillMode);
     }
 
     public static UpdateCanStashPacket decode(FriendlyByteBuf buf) {
-        return new UpdateCanStashPacket(buf.readBlockPos(), buf.readEnum(CanStashBlockEntity.Mode.class), buf.readUtf(256), buf.readVarInt(), buf.readVarInt(), buf.readBoolean());
+        return new UpdateCanStashPacket(buf.readBlockPos(), buf.readEnum(CanStashBlockEntity.Mode.class), buf.readUtf(256), buf.readVarInt(), buf.readVarInt(), buf.readBoolean(), buf.readBoolean(), buf.readEnum(CanStashBlockEntity.RefillMode.class));
     }
 
     public static void handle(UpdateCanStashPacket packet, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -50,7 +56,7 @@ public class UpdateCanStashPacket {
                 return;
             }
             if (player.level().getBlockEntity(packet.pos) instanceof CanStashBlockEntity stash) {
-                stash.applySettings(packet.mode, packet.lootTable, packet.respawnSeconds, packet.searchSeconds, packet.requiresTool);
+                stash.applySettings(packet.mode, packet.lootTable, packet.respawnSeconds, packet.searchSeconds, packet.requiresTool, packet.perPlayer, packet.refillMode);
             }
         });
         context.setPacketHandled(true);
