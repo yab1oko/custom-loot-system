@@ -1,5 +1,95 @@
 # Changelog
 
+## 4.1
+
+### Темы творческого режима
+Четыре темы экранов настройки: ваниль, тёмная, дерево, железо. Тема, звук кнопок и звук обновления лута живут в конфиге. Экран обыска в выживании не менялся.
+
+### Библиотека сундуков
+Список с поиском и карточка справа: сетка предметов со шансами или имя таблицы лута, без пустой сетки.
+
+### Лут на игрока
+По умолчанию выключено. Включённый контейнер крутит лут отдельно каждому. Старый общий лут первому игроку не копируется. Режим обновления: заменить сразу или ждать, пока опустеет. Аирдроп по-прежнему общий и одноразовый.
+
+### Обыск
+Сервер сам считает время обыска. Открыть контейнер раньше нельзя.
+
+### Команды
+- `/cts refill` — контейнер, на который смотришь
+- `/cts refill nearby [радиус]` — рядом, по умолчанию 16, не больше 64
+- `/cts refill all confirm` — загруженные контейнеры в этом измерении
+- `/cts inspect` — режим, лут, таймеры, «на игрока», инструмент
+- `/cts exportlt` и прежняя `/exportlt`
+
+### Аирдроп
+Грузовой самолёт пролетает и сбрасывает тот же ящик с парашютом. `airdrop.plane` в конфиге, по умолчанию включено. Выключено — ящик появляется в небе, как раньше.
+
+### По желанию
+- **JEI** — страница «Лут CTS» и подсказки к жезлу, библиотеке и книге лута
+- **KubeJS** — `CtsEvents.lootRolled`, `containerOpened`, `containerRefilled`, `airdropLanded`. Ошибка скрипта пишется в лог и не ломает лут
+
+### Прочее
+- Версия мода: **4.1**
+
+## 4.1 (English)
+
+### Creative themes
+Four config-screen themes: vanilla, dark, wood, iron. Theme, button sounds, and the refill sound live in the config. The survival search screen is unchanged.
+
+### Chest Library
+A searchable list and a detail card: an item grid with chance chips, or the loot-table id with no empty grid.
+
+### Per-player loot
+Off by default. When on, each player gets their own roll. Old shared contents are not copied to the first player. Refill can replace immediately or wait until the container is empty. Airdrops stay shared and one-shot.
+
+### Search
+The server times the search. The container will not open early.
+
+### Commands
+- `/cts refill` — the container you are looking at
+- `/cts refill nearby [radius]` — default 16, capped at 64
+- `/cts refill all confirm` — loaded containers in this dimension
+- `/cts inspect` — mode, loot, timers, per-player, tool
+- `/cts exportlt`, and `/exportlt` still works
+
+### Airdrop
+A cargo plane flies over and drops the same parachute crate. `airdrop.plane` defaults to on. Off keeps the crate appearing in the sky.
+
+### Optional
+- **JEI** — a CTS loot page, plus notes on the Conversion Wand, Chest Library, and Loot Book
+- **KubeJS** — `CtsEvents.lootRolled`, `containerOpened`, `containerRefilled`, `airdropLanded`. A script error is logged and does not break loot
+
+### Other
+- Mod version: **4.1**
+
+## 4.0
+
+### Библиотека сундуков
+Творческий каталог контейнеров. Shift и ПКМ сохраняет настроенный контейнер, его можно поставить снова.
+
+### Жезл превращения
+Подтверждение перед превращением. Если у сундука есть таблица лута, она остаётся. Если таблицы нет, остаются предметы. Таблица важнее предметов.
+
+### Чужие сундуки
+Моддовые сундуки можно превратить, если они в `#cts:chest_like`. Тег `#cts:convertible` расширен.
+
+### Прочее
+- Версия мода: **4.0**
+
+## 4.0 (English)
+
+### Chest Library
+Creative catalog of containers. Shift-right-click saves a configured container so it can be placed again.
+
+### Conversion Wand
+Confirm before converting. A loot table on the chest is kept. Saved items are kept when there is no table. The table wins over items.
+
+### Modded chests
+Modded chests can be converted when they are in `#cts:chest_like`. `#cts:convertible` is extended.
+
+### Other
+- Mod version: **4.0**
+
 ## 3.0
 
 ### Контейнеры открываются

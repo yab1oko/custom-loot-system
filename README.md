@@ -24,13 +24,13 @@ An invisible floor or wall plate that shows a single item. Right-click to pick i
 </p>
 
 ### Searchable Props
-Props look like junk, storage, or furniture. Hold use to search, then open a chest-style inventory. They support template items or loot-table mode, a configurable search time, full and empty models, open sounds, and a respawn timer. Optional “needs tool” mode only opens with a matching held item — tools lose durability, stackables are consumed.
+Props look like junk, storage, or furniture. Hold use to search, then open a chest-style inventory. They support template items or loot-table mode, a configurable search time, full and empty models, open sounds, and a respawn timer. Optional “needs tool” mode only opens with a matching held item — tools lose durability, stackables are consumed. The server times the search, so the container cannot open early.
 
 ### Conversion Wand
-Turns a vanilla container (chest, barrel, hopper, dispenser, dropper, shulker box, and more) into a CTS loot container while keeping its look. Confirm before converting; use the wand again to revert. Double chests are not supported.
+Turns a vanilla container (chest, barrel, hopper, dispenser, dropper, shulker box, and more) into a CTS loot container while keeping its look. Confirm before converting; use the wand again to revert. Double chests are not supported. A loot table already on the chest is kept. Saved items are kept when there is no table. Modded chests in `#cts:chest_like` can be converted too.
 
 ### Loot Table Editor
-An in-game book for building chest loot tables and exporting JSON for datapacks and map folders. Entries support chance, stack size, random durability, and random enchantments, plus tag slips with member preview and filters. After exporting to `.minecraft`, run `/exportlt` in the world to embed them, then `/reload`.
+An in-game book for building chest loot tables and exporting JSON for datapacks and map folders. Entries support chance, stack size, random durability, and random enchantments, plus tag slips with member preview and filters. After exporting to `.minecraft`, run `/exportlt` or `/cts exportlt` in the world to embed them, then `/reload`.
 
 <p align="center">
 <img src="https://media.forgecdn.net/attachments/description/1713931/description_dd2b52c1-a126-4682-b803-bd3a59dabead.png" alt="Loot Table Editor" width="278">
@@ -44,8 +44,11 @@ Drop a tag slip into any loot slot on a plate, prop, or book. Pick an item or bl
 <img src="https://media.forgecdn.net/attachments/description/null/description_8c34a922-4c61-49d0-a658-547889b51869.png" alt="Tag members preview" width="283">
 </p>
 
+### Chest Library
+A creative catalog of saved containers. Shift-right-click a configured container to save it, then place that entry again. The screen is a searchable list plus a detail card: item slots with chance chips, or the loot-table id when the container uses a table. The catalog is stored in `config/cts/chest_library.nbt`, so it is the same in every world.
+
 ## 🪂 Airdrops
-Airdrops send a parachute crate into the world — once in an area, or on a timer around a point. Players get a radio warning, then the crate falls with a parachute and opens as searchable loot.
+Airdrops send a parachute crate into the world — once in an area, or on a timer around a point. Players get a radio warning, then the crate falls with a parachute and opens as searchable loot. A cargo plane can fly over and drop that same crate (`airdrop.plane`, on by default). The flight lasts as long as the flyover sound. The crate glows, smoke rises from the center, and breaking any part breaks the whole drop. Turn the plane off and the crate still appears in the sky.
 
 <p align="center">
 <iframe width="560" height="315" src="https://www.youtube.com/embed/0rfys6DjqYE" title="CTS airdrops" frameborder="0" allowfullscreen></iframe>
@@ -60,13 +63,21 @@ Airdrops send a parachute crate into the world — once in an area, or on a time
 - `/cts airdrop auto <radius> <minutes> [loot_table]` — keep dropping around the spot where you ran the command
 - `/cts airdrop auto status` — radius, interval, and time until the next drop
 - `/cts airdrop auto clear` — turn automatic drops off
+- `/cts refill` — refill the container you are looking at
+- `/cts refill nearby [radius]` — nearby containers, default 16, capped at 64
+- `/cts refill all confirm` — loaded containers in this dimension
+- `/cts inspect` — mode, loot, timers, per-player state, and the required tool
 
 If you omit the loot table, CTS uses the default from config (`config/cts-common.toml` / Mods → CTS → Config), usually `cts:airdrop`.
 
 ## 🎮 How to use
 In Creative, open the CTS tab (Props, Blocks, Breakables). Shift + right-click a configured block to edit it. Survival players never see the config UI.
 
-Open the pause menu → **Mods** to reach CTS settings (default respawn time and default airdrop loot table). Blocks you already placed keep their own timers.
+Per-player loot is off by default. When it is on, each player gets their own roll. Refill can replace the contents right away or wait until the container is empty. The timer keeps running while the container is open and while the chunk is unloaded. Airdrops stay shared and one-shot.
+
+Open the pause menu → **Mods** to reach CTS settings (default respawn time, default airdrop loot table, and the refill sound). Blocks you already placed keep their own timers.
+
+Optional **JEI** adds a CTS loot page and lets you drag an item into a container template. Optional **KubeJS** can listen for `CtsEvents.lootRolled`, `containerOpened`, `containerRefilled`, and `airdropLanded`.
 
 <p align="center">
 <a href="https://discord.gg/tXMBWwSuRp"><img src="https://media.forgecdn.net/attachments/description/1713931/description_c645ea44-90cd-4e8b-9d57-eaeab7081ee4.png" alt="Join Discord" width="560"></a>
