@@ -645,6 +645,7 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
             refillIfReady(player);
         }
         setLooted(true);
+        cts.yblk.cts.compat.kubejs.CtsKubeBridge.opened(player, worldPosition);
         if (level != null) {
             level.playSound(null, worldPosition, openSound(), SoundSource.BLOCKS, 1.0F, 1.0F);
         }
@@ -890,6 +891,7 @@ public class CanStashBlockEntity extends BlockEntity implements MenuProvider {
             playRefillSound();
         }
         setChanged();
+        cts.yblk.cts.compat.kubejs.CtsKubeBridge.lootRolled(opener, worldPosition, sound);
     }
 
     private void playRefillSound() {

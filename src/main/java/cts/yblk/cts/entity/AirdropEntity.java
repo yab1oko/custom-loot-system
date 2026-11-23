@@ -139,6 +139,7 @@ public class AirdropEntity extends Entity {
             stash.setupAirdrop(getLootTable());
         }
         level().playSound(null, master, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
+        cts.yblk.cts.compat.kubejs.CtsKubeBridge.airdropLanded(master);
         discard();
     }
 

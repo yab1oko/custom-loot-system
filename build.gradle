@@ -132,6 +132,18 @@ repositories {
         name = "Shedaniel's maven"
         url = 'https://maven.shedaniel.me/'
     }
+    maven {
+        name = "BlameJared"
+        url = 'https://maven.blamejared.com/'
+    }
+    maven {
+        name = "Latvian"
+        url = 'https://maven.latvian.dev/releases'
+    }
+    maven {
+        name = "Architectury"
+        url = 'https://maven.architectury.dev/'
+    }
 }
 
 dependencies {
@@ -149,6 +161,15 @@ dependencies {
     // userdev classpath (that causes NoSuchMethodError Component.m_237115_). Drop the
     // production Forge jar into run/mods for IDE runs — FML remaps it correctly.
     compileOnly fg.deobf("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
+
+    // Optional JEI. compileOnly so a missing install never loads these classes.
+    compileOnly fg.deobf("mezz.jei:jei-1.20.1-common-api:15.75.0.238")
+    compileOnly fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.75.0.238")
+
+    // Optional KubeJS. Isolated behind ModList.isLoaded and kubejs.plugins.txt.
+    compileOnly fg.deobf("dev.architectury:architectury-forge:9.1.12")
+    compileOnly fg.deobf("dev.latvian.mods:rhino-forge:2001.2.2-build.17")
+    compileOnly fg.deobf("dev.latvian.mods:kubejs-forge:2001.6.5-build.26")
 
     // Soft-dep Cold Weapons for IDE runs (screwdriver etc). Do NOT put the production
     // jar in run/mods — userdev hits NoSuchFieldError (SRG). fg.deobf remaps from libs/.

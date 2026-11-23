@@ -224,7 +224,7 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
             return;
         }
         if (displayedItem.isEmpty() && isConfigured() && cooldownTicks >= 0) {
-            spawnFromSource();
+            spawnFromSource(null, false);
         } else if (!isConfigured()) {
             displayedItem = ItemStack.EMPTY;
             cooldownTicks = 0;
@@ -243,7 +243,7 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
             playerCooldown.remove(player.getUUID());
         }
         cooldownTicks = 0;
-        spawnFromSource();
+        spawnFromSource(player, true);
         syncToClient();
     }
 
@@ -257,6 +257,7 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
             if (rolled.isEmpty()) {
                 return false;
             }
+            cts.yblk.cts.compat.kubejs.CtsKubeBridge.lootRolled(player, worldPosition, false);
             if (!player.getInventory().add(rolled)) {
                 ItemEntity dropped = player.drop(rolled, false);
                 if (dropped != null) {
@@ -312,14 +313,15 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
             plate.cooldownTicks--;
         }
         if (plate.cooldownTicks == 0) {
-            plate.spawnFromSource();
+            plate.spawnFromSource(null, true);
             plate.setChanged();
             plate.syncToClient();
         }
     }
 
-    private void spawnFromSource() {
-        displayedItem = rollLoot(null).copy();
+    private void spawnFromSource(@Nullable Player player, boolean refilled) {
+        displayedItem = rollLoot(player).copy();
+        cts.yblk.cts.compat.kubejs.CtsKubeBridge.lootRolled(player, worldPosition, refilled);
         if (displayedItem.isEmpty()) {
             cooldownTicks = respawnSeconds <= 0 ? -1 : Math.max(20, respawnSeconds * 20);
         } else {

@@ -70,6 +70,20 @@ ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies."${mod_id}"]]
+modId = "kubejs"
+mandatory = false
+versionRange = "[2001.6,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "jei"
+mandatory = false
+versionRange = "[15.0,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies."${mod_id}"]]
 modId = "cloth_config"
 mandatory = false
 versionRange = "[11.0,)"
