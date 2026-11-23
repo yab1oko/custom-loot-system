@@ -41,6 +41,9 @@ public class OpenCanStashPacket {
                     && !CanStashBlock.isSearchable(player.level().getBlockState(inventory))) {
                 return;
             }
+            if (!cts.yblk.cts.search.SearchSessions.allowOpen(player, inventory)) {
+                return;
+            }
             if (player.level().getBlockEntity(inventory) instanceof CanStashBlockEntity stash) {
                 stash.openChest(player);
             }

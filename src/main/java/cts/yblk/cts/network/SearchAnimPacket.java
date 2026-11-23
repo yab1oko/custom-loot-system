@@ -80,6 +80,9 @@ public class SearchAnimPacket {
                     && !stash.allowsSearch(sender)) {
                 return;
             }
+            cts.yblk.cts.search.SearchSessions.start(sender, inventory);
+        } else {
+            cts.yblk.cts.search.SearchSessions.stop(sender);
         }
         ModNetwork.CHANNEL.send(
                 PacketDistributor.TRACKING_ENTITY.with(() -> sender),
