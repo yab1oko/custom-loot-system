@@ -248,6 +248,29 @@ public class ItemEntryEditor {
         }
     }
 
+    public static void drawBadge(GuiGraphics graphics, Font font, int x, int y, int chance, int min, int max,
+                                 boolean damageable, boolean randomDamage, boolean randomEnchant) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 300);
+        graphics.pose().scale(0.5F, 0.5F, 1);
+        int chanceColor = chance >= 70 ? 0xFF1B7A32 : chance >= 30 ? 0xFFC4A035 : 0xFFA33B3B;
+        chip(graphics, font, x * 2, y * 2, chance + "%", chanceColor, 0xFFFFFFFF);
+        if (randomEnchant) {
+            chip(graphics, font, x * 2, y * 2 + 9, Component.translatable("gui.cts.enchant_mark").getString(), 0xCC202020, 0xFFFFFFFF);
+        }
+        String mark;
+        if (damageable) {
+            mark = randomDamage ? Component.translatable("gui.cts.random_mark").getString() : "";
+        } else {
+            mark = min == max ? Integer.toString(min) : min + "-" + max;
+        }
+        if (!mark.isEmpty()) {
+            int markWidth = font.width(mark) + 3;
+            chip(graphics, font, (x + 16) * 2 - markWidth, (y + 12) * 2, mark, 0xCC202020, 0xFFFFFFFF);
+        }
+        graphics.pose().popPose();
+    }
+
     private static void chip(GuiGraphics graphics, Font font, int x, int y, String text, int background, int foreground) {
         int width = font.width(text) + 3;
         graphics.fill(x, y, x + width, y + 9, background);
