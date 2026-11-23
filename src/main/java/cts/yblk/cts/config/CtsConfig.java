@@ -18,6 +18,12 @@ public final class CtsConfig {
 
     static final ForgeConfigSpec.IntValue DEFAULT_LOOT_RESPAWN_SECONDS;
     static final ForgeConfigSpec.ConfigValue<String> DEFAULT_AIRDROP_LOOT_TABLE;
+    static final ForgeConfigSpec.ConfigValue<String> CREATIVE_THEME;
+    static final ForgeConfigSpec.BooleanValue BUTTON_SOUNDS;
+    static final ForgeConfigSpec.BooleanValue REFILL_SOUND;
+    static final ForgeConfigSpec.BooleanValue AIRDROP_PLANE;
+
+    public static final String FALLBACK_CREATIVE_THEME = "wood";
 
     /** Fallback before the config file is loaded (1 hour). */
     public static final int FALLBACK_LOOT_RESPAWN_SECONDS = 3600;
@@ -44,6 +50,27 @@ public final class CtsConfig {
                         "and as fallback when an airdrop entity has an empty table id.",
                         "Example: cts:airdrop")
                 .define("defaultLootTable", FALLBACK_AIRDROP_LOOT_TABLE);
+        AIRDROP_PLANE = builder
+                .comment(
+                        "When true, a cargo plane flies over and releases the parachute crate.",
+                        "When false, the crate appears in the sky on its own (legacy).")
+                .define("plane", true);
+        builder.pop();
+
+        builder.push("ui");
+        CREATIVE_THEME = builder
+                .comment(
+                        "Creative screen theme: vanilla, dark, wood, iron.",
+                        "Survival loot screens stay vanilla. Default: wood.")
+                .define("creativeTheme", FALLBACK_CREATIVE_THEME);
+        BUTTON_SOUNDS = builder
+                .comment("Play a click when a CTS creative button is pressed. Default: true.")
+                .define("buttonSounds", true);
+        REFILL_SOUND = builder
+                .comment(
+                        "Play a short quiet rustle at a container when its loot actually regenerates.",
+                        "Default: false, so survival chests do not give themselves away.")
+                .define("refillSound", false);
         builder.pop();
 
         SPEC = builder.build();
@@ -95,5 +122,51 @@ public final class CtsConfig {
     static void setDefaultAirdropLootTable(String table) {
         String normalized = LootTableIds.normalize(table);
         DEFAULT_AIRDROP_LOOT_TABLE.set(normalized.isEmpty() ? FALLBACK_AIRDROP_LOOT_TABLE : normalized);
+    }
+
+    public static String creativeTheme() {
+        if (!SPEC.isLoaded()) {
+            return FALLBACK_CREATIVE_THEME;
+        }
+        return sanitizeTheme(CREATIVE_THEME.get());
+    }
+
+    public static void setCreativeTheme(String id) {
+        CREATIVE_THEME.set(sanitizeTheme(id));
+    }
+
+    public static boolean buttonSounds() {
+        return !SPEC.isLoaded() || BUTTON_SOUNDS.get();
+    }
+
+    public static void setButtonSounds(boolean enabled) {
+        BUTTON_SOUNDS.set(enabled);
+    }
+
+    public static boolean refillSound() {
+        return SPEC.isLoaded() && REFILL_SOUND.get();
+    }
+
+    public static void setRefillSound(boolean enabled) {
+        REFILL_SOUND.set(enabled);
+    }
+
+    public static boolean airdropPlane() {
+        return !SPEC.isLoaded() || AIRDROP_PLANE.get();
+    }
+
+    public static void setAirdropPlane(boolean enabled) {
+        AIRDROP_PLANE.set(enabled);
+    }
+
+    private static String sanitizeTheme(String raw) {
+        if (raw == null) {
+            return FALLBACK_CREATIVE_THEME;
+        }
+        String id = raw.trim().toLowerCase();
+        return switch (id) {
+            case "vanilla", "dark", "wood", "iron" -> id;
+            default -> FALLBACK_CREATIVE_THEME;
+        };
     }
 }
