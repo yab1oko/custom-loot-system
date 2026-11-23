@@ -9,6 +9,10 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import cts.yblk.cts.blockentity.EntityPlateBlockEntity;
+import cts.yblk.cts.client.ui.CtsTheme;
+import cts.yblk.cts.client.ui.ThemeRenderer;
+import cts.yblk.cts.client.ui.ThemedButton;
+import cts.yblk.cts.client.ui.ThemedEditBox;
 import cts.yblk.cts.menu.EntityPlateMenu;
 import cts.yblk.cts.network.ModNetwork;
 import cts.yblk.cts.network.UpdateEntityPlatePacket;
@@ -38,7 +42,7 @@ public class EntityPlateScreen extends AbstractContainerScreen<EntityPlateMenu> 
         this.randomize = plate.isRandomize();
         this.sentOnClose = false;
 
-        addRenderableWidget(Button.builder(modeLabel(), button -> {
+        addRenderableWidget(ThemedButton.create(modeLabel(), button -> {
             randomize = !randomize;
             button.setMessage(modeLabel());
         }).bounds(leftPos + 98, topPos + 18, 70, 16).build());
@@ -52,7 +56,7 @@ public class EntityPlateScreen extends AbstractContainerScreen<EntityPlateMenu> 
         addRenderableWidget(radiusBox);
 
         for (int i = 0; i < idBoxes.length; i++) {
-            EditBox box = new EditBox(this.font, leftPos + 8, topPos + 86 + i * 15, 112, 14, Component.translatable("gui.cts.entity"));
+            EditBox box = new ThemedEditBox(this.font, leftPos + 8, topPos + 86 + i * 15, 112, 14, Component.translatable("gui.cts.entity"));
             box.setMaxLength(128);
             box.setValue(plate.getEntityId(i));
             addRenderableWidget(box);
@@ -69,7 +73,7 @@ public class EntityPlateScreen extends AbstractContainerScreen<EntityPlateMenu> 
     }
 
     private EditBox numberBox(int x, int y, int value) {
-        EditBox box = new EditBox(this.font, x, y, 40, 14, Component.literal(""));
+        EditBox box = new ThemedEditBox(this.font, x, y, 40, 14, Component.literal(""));
         box.setMaxLength(8);
         box.setValue(Integer.toString(value));
         box.setFilter(text -> text.isEmpty() || text.chars().allMatch(Character::isDigit));
@@ -169,17 +173,17 @@ public class EntityPlateScreen extends AbstractContainerScreen<EntityPlateMenu> 
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.fill(leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, 0xF0101010);
-        graphics.fill(leftPos, topPos, leftPos + imageWidth, topPos + 1, 0xFF6E6E6E);
+        ThemeRenderer.panel(graphics, leftPos, topPos, imageWidth, imageHeight);
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 0xFFFFFF, false);
-        graphics.drawString(this.font, Component.translatable("gui.cts.respawn_label"), 8, 40, 0xC6C6C6, false);
-        graphics.drawString(this.font, Component.translatable("gui.cts.radius"), 98, 40, 0xC6C6C6, false);
-        graphics.drawString(this.font, Component.translatable("gui.cts.entities"), 8, 72, 0xC6C6C6, false);
-        graphics.drawString(this.font, Component.translatable("gui.cts.chance"), 126, 72, 0xC6C6C6, false);
+        int ink = CtsTheme.current().ink();
+        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, ink, false);
+        graphics.drawString(this.font, Component.translatable("gui.cts.respawn_label"), 8, 40, ink, false);
+        graphics.drawString(this.font, Component.translatable("gui.cts.radius"), 98, 40, ink, false);
+        graphics.drawString(this.font, Component.translatable("gui.cts.entities"), 8, 72, ink, false);
+        graphics.drawString(this.font, Component.translatable("gui.cts.chance"), 126, 72, ink, false);
     }
 
     @Override

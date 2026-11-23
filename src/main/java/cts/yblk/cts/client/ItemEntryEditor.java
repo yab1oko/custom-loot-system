@@ -14,6 +14,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import cts.yblk.cts.blockentity.SpawnChance;
+import cts.yblk.cts.client.ui.CtsTheme;
+import cts.yblk.cts.client.ui.ThemeRenderer;
+import cts.yblk.cts.client.ui.ThemedButton;
+import cts.yblk.cts.client.ui.ThemedEditBox;
 import cts.yblk.cts.item.TagSlipItem;
 
 import java.util.ArrayList;
@@ -84,7 +88,7 @@ public class ItemEntryEditor {
         if (this.damageable) {
             minSlider = null;
             maxSlider = null;
-            durabilityButton = Button.builder(durabilityLabel(), button -> toggleDurability())
+            durabilityButton = ThemedButton.create(durabilityLabel(), button -> toggleDurability())
                     .bounds(left + 8, row, WIDTH - 16, 18)
                     .build();
             row += 22;
@@ -98,7 +102,7 @@ public class ItemEntryEditor {
             row += 22;
         }
         if (this.enchantable) {
-            enchantButton = Button.builder(enchantLabel(), button -> toggleEnchant())
+            enchantButton = ThemedButton.create(enchantLabel(), button -> toggleEnchant())
                     .bounds(left + 8, row, WIDTH - 16, 18)
                     .build();
             row += 22;
@@ -106,7 +110,7 @@ public class ItemEntryEditor {
             enchantButton = null;
         }
         if (tagSlip) {
-            tagBox = new EditBox(font, left + 8, row + 10, WIDTH - 16, 16, Component.translatable("gui.cts.tag"));
+            tagBox = new ThemedEditBox(font, left + 8, row + 10, WIDTH - 16, 16, Component.translatable("gui.cts.tag"));
             tagBox.setMaxLength(128);
             tagBox.setValue(tag == null ? "" : tag);
             tagSuggestions = new LootTableSuggestions(() -> 0, TagIndex::ids);
@@ -135,7 +139,7 @@ public class ItemEntryEditor {
         }
         chanceSlider = new ChanceSlider(left + 8, row, WIDTH - 16, chance);
         row += 22;
-        doneButton = Button.builder(Component.translatable("gui.cts.done"), button -> save())
+        doneButton = ThemedButton.create(Component.translatable("gui.cts.done"), button -> save())
                 .bounds(left + 8, row, WIDTH - 16, 18)
                 .build();
         this.height = row + 26 - top;
@@ -212,12 +216,8 @@ public class ItemEntryEditor {
         graphics.pose().pushPose();
         graphics.pose().translate(0, 0, 400);
         RenderSystem.disableDepthTest();
-        graphics.fill(left, top, left + WIDTH, top + height, 0xFF161616);
-        graphics.fill(left, top, left + WIDTH, top + 1, 0xFF6A6A6A);
-        graphics.fill(left, top + height - 1, left + WIDTH, top + height, 0xFF6A6A6A);
-        graphics.fill(left, top, left + 1, top + height, 0xFF6A6A6A);
-        graphics.fill(left + WIDTH - 1, top, left + WIDTH, top + height, 0xFF6A6A6A);
-        graphics.drawString(font, Component.translatable("gui.cts.item_entry"), left + 8, top + 6, 0xFFFFFF, false);
+        ThemeRenderer.panel(graphics, left, top, WIDTH, height);
+        graphics.drawString(font, Component.translatable("gui.cts.item_entry"), left + 8, top + 6, CtsTheme.current().ink(), false);
         if (damageable) {
             durabilityButton.render(graphics, mouseX, mouseY, 0);
         } else {
@@ -228,7 +228,7 @@ public class ItemEntryEditor {
             enchantButton.render(graphics, mouseX, mouseY, 0);
         }
         if (tagSlip && tagBox != null) {
-            graphics.drawString(font, Component.translatable("gui.cts.tag"), tagBox.getX(), tagBox.getY() - 10, 0xA0A0A0, false);
+            graphics.drawString(font, Component.translatable("gui.cts.tag"), tagBox.getX(), tagBox.getY() - 10, CtsTheme.current().muted(), false);
             tagBox.render(graphics, mouseX, mouseY, 0);
         }
         chanceSlider.render(graphics, mouseX, mouseY, 0);
@@ -246,6 +246,12 @@ public class ItemEntryEditor {
             graphics.renderTooltip(font, pickHover, mouseX, mouseY);
             pickHover = ItemStack.EMPTY;
         }
+    }
+
+    private static void chip(GuiGraphics graphics, Font font, int x, int y, String text, int background, int foreground) {
+        int width = font.width(text) + 3;
+        graphics.fill(x, y, x + width, y + 9, background);
+        graphics.drawString(font, text, x + 1, y + 1, foreground, false);
     }
 
     public static void drawEntries(GuiGraphics graphics, Font font, int guiLeft, int guiTop, List<Slot> menuSlots, int slots,
@@ -268,11 +274,12 @@ public class ItemEntryEditor {
             graphics.pose().pushPose();
             graphics.pose().translate(0, 0, 300);
             graphics.pose().scale(0.5F, 0.5F, 1);
-            String topMark = value + "%";
+            int chanceColor = value >= 70 ? 0xFF1B7A32 : value >= 30 ? 0xFFC4A035 : 0xFFA33B3B;
+            chip(graphics, font, x * 2, y * 2, value + "%", chanceColor, 0xFFFFFFFF);
             if (randomEnchant.test(i)) {
-                topMark = Component.translatable("gui.cts.enchant_mark").getString() + " " + topMark;
+                String enc = Component.translatable("gui.cts.enchant_mark").getString();
+                chip(graphics, font, x * 2, y * 2 + 9, enc, 0xCC202020, 0xFFFFFFFF);
             }
-            graphics.drawString(font, topMark, (x + 1) * 2, (y + 1) * 2, 0xFFFFFF, true);
             String mark;
             if (damageable.test(i)) {
                 mark = randomDamage.test(i) ? Component.translatable("gui.cts.random_mark").getString() : "";
@@ -282,8 +289,8 @@ public class ItemEntryEditor {
                 mark = low == high ? Integer.toString(low) : low + "-" + high;
             }
             if (!mark.isEmpty()) {
-                int width = font.width(mark);
-                graphics.drawString(font, mark, (x + 16) * 2 - width, (y + 11) * 2, 0xFFFFFF, true);
+                int markWidth = font.width(mark) + 3;
+                chip(graphics, font, (x + 16) * 2 - markWidth, (y + 12) * 2, mark, 0xCC202020, 0xFFFFFFFF);
             }
             graphics.pose().popPose();
         }

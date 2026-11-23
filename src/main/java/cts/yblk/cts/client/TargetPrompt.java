@@ -15,6 +15,7 @@ import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import cts.yblk.cts.Cts;
+import cts.yblk.cts.client.ui.ThemeRenderer;
 import cts.yblk.cts.block.BarricadeBlock;
 import cts.yblk.cts.block.CanStashBlock;
 import cts.yblk.cts.block.ShelvingBlock;
@@ -117,6 +118,23 @@ public class TargetPrompt {
         pose.translate(width / 2.0F, height / 2.0F - 42.0F, 0.0F);
         pose.scale(0.8F, 0.8F, 1.0F);
         int y = 0;
+        int boxWidth = minecraft.font.width(title);
+        int lines = 1;
+        if (status != null) {
+            boxWidth = Math.max(boxWidth, minecraft.font.width(status));
+            lines++;
+        }
+        if (action != null) {
+            Component preview = Component.empty()
+                    .append("[")
+                    .append(minecraft.options.keyUse.getTranslatedKeyMessage())
+                    .append("] ")
+                    .append(action);
+            boxWidth = Math.max(boxWidth, minecraft.font.width(preview));
+            lines++;
+        }
+        int boxHeight = lines * 12;
+        ThemeRenderer.softBackdrop(graphics, -boxWidth / 2 - 6, -3, boxWidth + 12, boxHeight + 4);
         graphics.drawCenteredString(minecraft.font, title, 0, y, 0xFFFFFF);
         y += 12;
         if (status != null) {

@@ -6,6 +6,10 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import cts.yblk.cts.client.ui.CtsTheme;
+import cts.yblk.cts.client.ui.ThemeRenderer;
+import cts.yblk.cts.client.ui.ThemedButton;
+import cts.yblk.cts.client.ui.ThemedEditBox;
 import cts.yblk.cts.network.ModNetwork;
 import cts.yblk.cts.network.SaveChestToLibraryPacket;
 
@@ -24,26 +28,27 @@ public class ChestLibrarySaveScreen extends Screen {
     protected void init() {
         int centerX = width / 2;
         int centerY = height / 2;
-        nameBox = new EditBox(font, centerX - 100, centerY - 10, 200, 20, Component.translatable("gui.cts.chest_library.name"));
+        nameBox = new ThemedEditBox(font, centerX - 100, centerY - 10, 200, 20, Component.translatable("gui.cts.chest_library.name"));
         nameBox.setMaxLength(64);
         nameBox.setValue(suggestedName);
         addRenderableWidget(nameBox);
         setInitialFocus(nameBox);
 
-        addRenderableWidget(Button.builder(Component.translatable("gui.cts.chest_library.save"), button -> {
+        addRenderableWidget(ThemedButton.create(Component.translatable("gui.cts.chest_library.save"), button -> {
             String name = nameBox.getValue();
             ModNetwork.CHANNEL.sendToServer(new SaveChestToLibraryPacket(pos, name));
             onClose();
         }).bounds(centerX - 100, centerY + 20, 95, 20).build());
 
-        addRenderableWidget(Button.builder(Component.translatable("gui.cts.cancel"), button -> onClose())
+        addRenderableWidget(ThemedButton.create(Component.translatable("gui.cts.cancel"), button -> onClose())
                 .bounds(centerX + 5, centerY + 20, 95, 20).build());
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(graphics);
-        graphics.drawCenteredString(font, title, width / 2, height / 2 - 40, 0xFFFFFF);
+        ThemeRenderer.panel(graphics, width / 2 - 120, height / 2 - 52, 240, 100);
+        graphics.drawCenteredString(font, title, width / 2, height / 2 - 40, CtsTheme.current().ink());
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 

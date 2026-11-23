@@ -10,6 +10,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import cts.yblk.cts.client.ui.CtsTheme;
+import cts.yblk.cts.client.ui.ThemeRenderer;
+import cts.yblk.cts.client.ui.ThemedButton;
+import cts.yblk.cts.client.ui.ThemedEditBox;
 import cts.yblk.cts.item.LootBookData;
 import cts.yblk.cts.item.TagSlipItem;
 import cts.yblk.cts.menu.LootBookMenu;
@@ -52,7 +56,7 @@ public class LootBookScreen extends AbstractContainerScreen<LootBookMenu> {
     @Override
     protected void init() {
         super.init();
-        nameBox = new EditBox(this.font, leftPos + 8, topPos + 18, imageWidth - 16, 16, Component.translatable("gui.cts.loot_table"));
+        nameBox = new ThemedEditBox(this.font, leftPos + 8, topPos + 18, imageWidth - 16, 16, Component.translatable("gui.cts.loot_table"));
         nameBox.setMaxLength(256);
         nameBox.setTextColor(TEXT);
         nameBox.setTextColorUneditable(MUTED);
@@ -61,20 +65,20 @@ public class LootBookScreen extends AbstractContainerScreen<LootBookMenu> {
         addRenderableWidget(nameBox);
         int buttonY = topPos + 38;
         int buttonW = (imageWidth - 20) / 2;
-        addRenderableWidget(Button.builder(Component.translatable("gui.cts.load"), button ->
+        addRenderableWidget(ThemedButton.create(Component.translatable("gui.cts.load"), button ->
                 ModNetwork.CHANNEL.sendToServer(new LoadLootBookPacket(nameBox.getValue())))
                 .bounds(leftPos + 8, buttonY, buttonW, 18)
                 .build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.cts.export"), button ->
+        addRenderableWidget(ThemedButton.create(Component.translatable("gui.cts.export"), button ->
                 ModNetwork.CHANNEL.sendToServer(new ExportLootBookPacket(nameBox.getValue())))
                 .bounds(leftPos + 12 + buttonW, buttonY, buttonW, 18)
                 .build());
         int pageY = topPos + LootBookMenu.SLOT_Y + LootBookData.ROWS * 18 + 1;
-        previousButton = addRenderableWidget(Button.builder(Component.literal("<"), button ->
+        previousButton = addRenderableWidget(ThemedButton.create(Component.literal("<"), button ->
                 ModNetwork.CHANNEL.sendToServer(new LootBookPagePacket(-1)))
                 .bounds(leftPos + LootBookMenu.SLOT_X, pageY, 20, 16)
                 .build());
-        nextButton = addRenderableWidget(Button.builder(Component.literal(">"), button ->
+        nextButton = addRenderableWidget(ThemedButton.create(Component.literal(">"), button ->
                 ModNetwork.CHANNEL.sendToServer(new LootBookPagePacket(1)))
                 .bounds(leftPos + LootBookMenu.SLOT_X + LootBookData.COLUMNS * 18 - 20, pageY, 20, 16)
                 .build());
@@ -111,14 +115,10 @@ public class LootBookScreen extends AbstractContainerScreen<LootBookMenu> {
         int y = topPos;
         int w = imageWidth;
         int bookBottom = y + LootBookMenu.INVENTORY_Y - 14;
-        graphics.fill(x, y, x + w, bookBottom, PANEL);
-        graphics.fill(x, y, x + w, y + 1, BORDER);
-        graphics.fill(x, bookBottom - 1, x + w, bookBottom, BORDER);
-        graphics.fill(x, y, x + 1, bookBottom, BORDER);
-        graphics.fill(x + w - 1, y, x + w, bookBottom, BORDER);
+        ThemeRenderer.panel(graphics, x, y, w, bookBottom - y);
         for (Slot slot : menu.slots) {
             if (slot.index < LootBookData.PAGE_SIZE) {
-                drawSlot(graphics, x + slot.x - 1, y + slot.y - 1);
+                ThemeRenderer.slot(graphics, x + slot.x - 1, y + slot.y - 1);
             }
         }
         graphics.blit(INVENTORY, x, bookBottom, 0, 126, w, 96);
@@ -131,11 +131,12 @@ public class LootBookScreen extends AbstractContainerScreen<LootBookMenu> {
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, TEXT, false);
+        CtsTheme theme = CtsTheme.current();
+        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, theme.ink(), false);
         graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 0x404040, false);
         String page = (menu.page() + 1) + "/" + menu.pageCount();
         graphics.drawString(this.font, page, (imageWidth - this.font.width(page)) / 2,
-                LootBookMenu.SLOT_Y + LootBookData.ROWS * 18 + 5, MUTED, false);
+                LootBookMenu.SLOT_Y + LootBookData.ROWS * 18 + 5, CtsTheme.current().muted(), false);
     }
 
     @Override

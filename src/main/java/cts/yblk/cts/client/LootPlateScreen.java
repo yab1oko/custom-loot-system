@@ -16,6 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cts.yblk.cts.blockentity.LootPlateBlockEntity;
+import cts.yblk.cts.client.ui.CtsTheme;
+import cts.yblk.cts.client.ui.ThemeRenderer;
+import cts.yblk.cts.client.ui.ThemedButton;
+import cts.yblk.cts.client.ui.ThemedEditBox;
 import cts.yblk.cts.menu.LootPlateMenu;
 import cts.yblk.cts.network.ModNetwork;
 import cts.yblk.cts.network.RequestLootTablesPacket;
@@ -48,7 +52,7 @@ public class LootPlateScreen extends AbstractContainerScreen<LootPlateMenu> {
         this.mode = plate.getMode();
         this.sentOnClose = false;
 
-        addRenderableWidget(Button.builder(modeLabel(), button -> {
+        addRenderableWidget(ThemedButton.create(modeLabel(), button -> {
             mode = mode == LootPlateBlockEntity.Mode.ITEMS
                     ? LootPlateBlockEntity.Mode.LOOT_TABLE
                     : LootPlateBlockEntity.Mode.ITEMS;
@@ -58,14 +62,14 @@ public class LootPlateScreen extends AbstractContainerScreen<LootPlateMenu> {
             sendSettings();
         }).bounds(leftPos + imageWidth - 78, topPos + 4, 70, 16).build());
 
-        lootTableBox = new EditBox(this.font, leftPos + 8, topPos + 36 + LootPlateMenu.TOP_EXTRA, 160, 16, Component.translatable("gui.cts.loot_table"));
+        lootTableBox = new ThemedEditBox(this.font, leftPos + 8, topPos + 36 + LootPlateMenu.TOP_EXTRA, 160, 16, Component.translatable("gui.cts.loot_table"));
         lootTableBox.setMaxLength(256);
         lootTableBox.setValue(plate.getLootTableId());
         lootSuggestions.attach(lootTableBox);
         addRenderableWidget(lootTableBox);
         ModNetwork.CHANNEL.sendToServer(new RequestLootTablesPacket());
 
-        respawnBox = new EditBox(this.font, leftPos + 8, topPos + 73 + LootPlateMenu.TOP_EXTRA, 40, 16, Component.translatable("gui.cts.respawn"));
+        respawnBox = new ThemedEditBox(this.font, leftPos + 8, topPos + 73 + LootPlateMenu.TOP_EXTRA, 40, 16, Component.translatable("gui.cts.respawn"));
         respawnBox.setMaxLength(8);
         respawnBox.setValue(Integer.toString(plate.getRespawnSeconds()));
         respawnBox.setFilter(text -> text.isEmpty() || text.chars().allMatch(Character::isDigit));
@@ -138,36 +142,23 @@ public class LootPlateScreen extends AbstractContainerScreen<LootPlateMenu> {
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        int x = leftPos;
-        int y = topPos;
-        int extra = LootPlateMenu.TOP_EXTRA;
-        graphics.blit(TEXTURE, x, y, 0, 0, imageWidth, 17);
-        for (int i = 0; i < extra; i++) {
-            graphics.blit(TEXTURE, x, y + 17 + i, 0, 16, imageWidth, 1);
-        }
-        int gridY = y + 17 + extra;
-        if (isItemMode()) {
-            graphics.blit(TEXTURE, x, gridY, 0, 17, imageWidth, 54);
-        } else {
-            for (int i = 0; i < 54; i++) {
-                graphics.blit(TEXTURE, x, gridY + i, 0, 16, imageWidth, 1);
+        ThemeRenderer.panel(graphics, leftPos, topPos, imageWidth, imageHeight);
+        for (Slot slot : menu.slots) {
+            if (slot.isActive()) {
+                ThemeRenderer.slot(graphics, leftPos + slot.x - 1, topPos + slot.y - 1);
             }
         }
-        int settingsY = gridY + 54;
-        for (int i = 0; i < SETTINGS; i++) {
-            graphics.blit(TEXTURE, x, settingsY + i, 0, 16, imageWidth, 1);
-        }
-        graphics.blit(TEXTURE, x, settingsY + SETTINGS, 0, 126, imageWidth, 96);
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 0x404040, false);
-        graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 0x404040, false);
+        int ink = CtsTheme.current().ink();
+        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, ink, false);
+        graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, ink, false);
         int extra = LootPlateMenu.TOP_EXTRA;
-        graphics.drawString(this.font, Component.translatable("gui.cts.respawn"), 52, 77 + extra, 0x404040, false);
+        graphics.drawString(this.font, Component.translatable("gui.cts.respawn"), 52, 77 + extra, ink, false);
         if (!isItemMode()) {
-            graphics.drawString(this.font, Component.translatable("gui.cts.loot_table"), 8, 22 + extra, 0x404040, false);
+            graphics.drawString(this.font, Component.translatable("gui.cts.loot_table"), 8, 22 + extra, ink, false);
         }
     }
 
