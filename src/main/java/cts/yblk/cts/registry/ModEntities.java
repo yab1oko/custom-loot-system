@@ -8,6 +8,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import cts.yblk.cts.Cts;
 import cts.yblk.cts.entity.AirdropEntity;
+import cts.yblk.cts.entity.AirdropPlaneEntity;
 
 public class ModEntities {
     public static final DeferredRegister<EntityType<?>> ENTITIES =
@@ -20,6 +21,14 @@ public class ModEntities {
                     .updateInterval(1)
                     .fireImmune()
                     .build(new ResourceLocation(Cts.MODID, "airdrop").toString()));
+
+    public static final RegistryObject<EntityType<AirdropPlaneEntity>> AIRDROP_PLANE = ENTITIES.register("airdrop_plane",
+            () -> EntityType.Builder.<AirdropPlaneEntity>of(AirdropPlaneEntity::new, MobCategory.MISC)
+                    .sized(3.2F, 1.2F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .fireImmune()
+                    .build(new ResourceLocation(Cts.MODID, "airdrop_plane").toString()));
 
     private ModEntities() {
     }

@@ -154,12 +154,15 @@ public class ClientSetup {
                 ctx -> new HingedPropRenderer(ctx, HingedPropSpec.of("waste_drum", 8, 26, 8, 'y', 22.5F)));
 
         event.registerEntityRenderer(cts.yblk.cts.registry.ModEntities.AIRDROP.get(), AirdropEntityRenderer::new);
+        event.registerEntityRenderer(cts.yblk.cts.registry.ModEntities.AIRDROP_PLANE.get(), AirdropPlaneRenderer::new);
     }
 
     @SubscribeEvent
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(cts.yblk.cts.client.model.AirdropFlyingModel.LAYER_LOCATION,
                 cts.yblk.cts.client.model.AirdropFlyingModel::createBodyLayer);
+        event.registerLayerDefinition(cts.yblk.cts.client.model.AirdropPlaneModel.LAYER,
+                cts.yblk.cts.client.model.AirdropPlaneModel::createBodyLayer);
     }
 
     @SubscribeEvent

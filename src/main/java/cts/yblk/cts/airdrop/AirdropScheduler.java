@@ -11,7 +11,9 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import cts.yblk.cts.Cts;
+import cts.yblk.cts.config.CtsConfig;
 import cts.yblk.cts.entity.AirdropEntity;
+import cts.yblk.cts.entity.AirdropPlaneEntity;
 import cts.yblk.cts.registry.ModSounds;
 
 import java.util.ArrayList;
@@ -63,13 +65,20 @@ public final class AirdropScheduler {
         double y = surface + AirdropEntity.dropHeight();
         y = Math.min(y, level.getMaxBuildHeight() - 4);
 
+        level.getServer().getPlayerList().broadcastSystemMessage(
+                Component.translatable("command.cts.airdrop.incoming", x, z), false);
+        if (CtsConfig.airdropPlane()) {
+            AirdropPlaneEntity plane = AirdropPlaneEntity.create(level, x + 1.0D, y, z + 1.0D, pending.lootTable);
+            if (plane != null) {
+                level.addFreshEntity(plane);
+            }
+            return;
+        }
         AirdropEntity entity = AirdropEntity.create(level, x + 1.0D, y, z + 1.0D, pending.lootTable);
         if (entity != null) {
             level.addFreshEntity(entity);
             level.playSound(null, entity.getX(), entity.getY(), entity.getZ(),
                     ModSounds.AIRDROP.get(), SoundSource.AMBIENT, 1.0F, 1.0F);
-            level.getServer().getPlayerList().broadcastSystemMessage(
-                    Component.translatable("command.cts.airdrop.incoming", x, z), false);
         }
     }
 
