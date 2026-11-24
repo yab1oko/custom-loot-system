@@ -2,27 +2,42 @@
 
 ## 4.1 — Minecraft 1.20.1 Forge
 
-- Chest Library is a searchable list with a detail card: item slots and chances, or the loot-table id. The catalog is saved in `config/cts/chest_library.nbt` and is shared by every world.
-- Per-player loot is off by default. When it is on, each player gets their own roll, and old shared contents are not copied to the first player. Refill can replace the contents immediately or wait until the container is empty. Airdrops stay shared and one-shot.
-- The server times the search. The container cannot be opened early, the timer no longer freezes at zero, and sitting in the open container does not restart it.
-- Refill time is an absolute clock. It keeps running while the container is open and while the chunk is unloaded.
-- A refill sound plays when loot comes back. It is on by default.
-- `/cts refill` refills the container you are looking at. `/cts refill nearby [radius]` defaults to 16 and caps at 64. `/cts refill all confirm` refills loaded containers in the dimension. `/cts inspect` shows mode, loot, timers, per-player state, and the tool. `/cts exportlt` works, and `/exportlt` still works.
-- A cargo plane flies over and drops the same parachute crate. `airdrop.plane` defaults to on. The flight lasts as long as the flyover sound. The crate glows, smoke rises from its center, and breaking any part breaks the whole drop. Turn the plane off and the crate still appears in the sky.
-- Optional JEI adds a CTS loot page, item notes, and drag-and-drop from JEI into a container template.
-- Optional KubeJS: `CtsEvents.lootRolled`, `containerOpened`, `containerRefilled`, `airdropLanded`. A script error is logged and does not break loot.
+Everything since 4.0.
 
-## 4.1 — Minecraft 1.20.1 Forge (русский)
+### Chest Library
+- Searchable list and a detail card: item slots with chances, or the loot-table id
+- Saved in `config/cts/chest_library.nbt` and shared by every world
 
-- Библиотека сундуков: список с поиском и карточка справа, слоты со шансами или имя таблицы лута. Каталог лежит в `config/cts/chest_library.nbt` и общий для всех миров.
-- Лут на игрока по умолчанию выключен. Если включён, каждый получает свой ролл, а старый общий лут первому игроку не копируется. Обновление может заменить содержимое сразу или ждать, пока контейнер опустеет. Аирдроп по-прежнему общий и одноразовый.
-- Время обыска считает сервер. Открыть контейнер раньше нельзя, таймер больше не застывает на нуле, и сидение в открытом контейнере его не перезапускает.
-- Таймер обновления абсолютный: идёт, пока контейнер открыт и пока чанк не загружен.
-- При возврате лута играет звук. По умолчанию он включён.
-- `/cts refill` обновляет контейнер, на который смотришь. `/cts refill nearby [радиус]` — по умолчанию 16, не больше 64. `/cts refill all confirm` — загруженные контейнеры в этом измерении. `/cts inspect` показывает режим, лут, таймеры, «на игрока» и инструмент. `/cts exportlt` работает, прежняя `/exportlt` тоже.
-- Грузовой самолёт пролетает и сбрасывает тот же ящик с парашютом. `airdrop.plane` по умолчанию включён. Полёт длится столько же, сколько звук. Ящик светится, дым идёт из центра, а сломанная любая часть ломает весь дроп. Выключенный самолёт оставляет ящик в небе, как раньше.
-- По желанию JEI: страница «Лут CTS», подсказки и перетаскивание предмета из JEI в шаблон контейнера.
-- По желанию KubeJS: `CtsEvents.lootRolled`, `containerOpened`, `containerRefilled`, `airdropLanded`. Ошибка скрипта пишется в лог и не ломает лут.
+### Per-player loot
+- Off by default. Each player gets their own roll. Old shared contents are not copied to the first player
+- Airdrops stay shared and one-shot
+
+### Search
+- The server times the search. The container cannot open early
+- The timer no longer freezes at zero
+- Sitting in the open container does not restart the timer
+
+### Refill
+- Replace the contents immediately, or wait until the container is empty
+- The timer keeps running while the container is open and while the chunk is unloaded
+- A refill sound plays when loot comes back. On by default
+
+### Commands
+- `/cts refill` — the container you are looking at
+- `/cts refill nearby [radius]` — default 16, capped at 64
+- `/cts refill all confirm` — loaded containers in this dimension
+- `/cts inspect` — mode, loot, timers, per-player state, and the tool
+- `/cts exportlt`, and `/exportlt` still works
+
+### Airdrops
+- A cargo plane flies over and drops the same parachute crate. `airdrop.plane` defaults to on
+- The flight lasts as long as the flyover sound
+- The crate glows, smoke rises from the center, and breaking any part breaks the whole drop
+- Turn the plane off and the crate still appears in the sky
+
+### Optional
+- **JEI** — a CTS loot page, item notes, and drag-and-drop from JEI into a container template
+- **KubeJS** — `CtsEvents.lootRolled`, `containerOpened`, `containerRefilled`, `airdropLanded`. A script error is logged and does not break loot
 
 ## 4.0
 
