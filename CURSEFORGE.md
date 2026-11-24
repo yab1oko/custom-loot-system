@@ -15,7 +15,7 @@ Forge 1.20.1 mapmaking tool: searchable props, loot plates, and airdrops. Surviv
 - Source / issues: https://github.com/yab1oko/custom-loot-system
 - Logo: `cts.png` in the jar
 - Categories: primary **Adventure and RPG**. Also **Utility & QoL**, **Server Utility**.
-- License on the page: leave it until you confirm it. `gradle.properties` and the jar say **All Rights Reserved**. The live CurseForge page has been MIT. Do not switch either side in this release.
+- License: **MIT**. Same value in `gradle.properties`, `LICENSE`, and the jar.
 
 ## File upload
 
