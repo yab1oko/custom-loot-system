@@ -6,7 +6,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import cts.yblk.cts.client.ui.CtsTheme;
 import cts.yblk.cts.client.ui.ThemeRenderer;
 import cts.yblk.cts.client.ui.ThemedButton;
 import cts.yblk.cts.client.ui.ThemedEditBox;
@@ -48,7 +47,8 @@ public class ChestLibrarySaveScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(graphics);
         ThemeRenderer.panel(graphics, width / 2 - 120, height / 2 - 52, 240, 100);
-        graphics.drawCenteredString(font, title, width / 2, height / 2 - 40, CtsTheme.current().ink());
+        int titleW = font.width(title);
+        graphics.drawString(font, title, width / 2 - titleW / 2, height / 2 - 40, 0x404040, false);
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 

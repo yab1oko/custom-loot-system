@@ -78,7 +78,9 @@ public class CanStashSearch {
         if (ticks < duration) {
             ticks++;
             BlockState state = minecraft.level.getBlockState(pos);
-            boolean customSearchSound = state.is(ModBlocks.CORPSE.get());
+            if (searchingSound != null && !minecraft.getSoundManager().isActive(searchingSound)) {
+                startSearchingSound(minecraft, pos);
+            }
             // No player.swing() — it fights PA and shakes the body like repeated clicks.
             // Without PA, a light alternate swing is the only FP feedback.
             if (!SearchAnimation.isAvailable() && ticks % 8 == 1) {
@@ -87,7 +89,7 @@ public class CanStashSearch {
                         : InteractionHand.OFF_HAND;
                 minecraft.player.swing(hand, false);
             }
-            if (!customSearchSound && ticks % 6 == 1) {
+            if (ticks % 6 == 1) {
                 SoundType sound = state.is(ModBlocks.BOXES.get())
                         ? SoundType.WOOL
                         : state.getBlock() instanceof BrickCacheBlock
@@ -95,14 +97,23 @@ public class CanStashSearch {
                         : state.getSoundType(minecraft.level, pos, minecraft.player);
                 minecraft.level.playLocalSound(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D,
                         sound.getHitSound(), SoundSource.BLOCKS,
-                        (sound.getVolume() + 1.0F) / 8.0F, sound.getPitch() * 0.5F, false);
+                        0.55F, sound.getPitch() * 0.85F, false);
             }
             if (ticks >= duration) {
                 stopSearchingSound();
+                ModNetwork.CHANNEL.sendToServer(new OpenCanStashPacket(target));
                 endRummage(minecraft);
+            }
+            return;
+        }
+        if (ticks < duration + 40) {
+            ticks++;
+            if ((ticks - duration) % 5 == 0 && target != null) {
                 ModNetwork.CHANNEL.sendToServer(new OpenCanStashPacket(target));
             }
+            return;
         }
+        reset();
     }
 
     @SubscribeEvent
@@ -191,13 +202,13 @@ public class CanStashSearch {
 
     private static void startSearchingSound(Minecraft minecraft, BlockPos pos) {
         stopSearchingSound();
-        if (minecraft.level == null || !minecraft.level.getBlockState(pos).is(ModBlocks.CORPSE.get())) {
+        if (minecraft.level == null) {
             return;
         }
         searchingSound = new SimpleSoundInstance(
                 ModSounds.SEARCHING.get(),
                 SoundSource.BLOCKS,
-                1.0F,
+                0.85F,
                 1.0F,
                 RandomSource.create(),
                 pos);

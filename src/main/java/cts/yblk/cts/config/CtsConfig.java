@@ -68,9 +68,9 @@ public final class CtsConfig {
                 .define("buttonSounds", true);
         REFILL_SOUND = builder
                 .comment(
-                        "Play a short quiet rustle at a container when its loot actually regenerates.",
-                        "Default: false, so survival chests do not give themselves away.")
-                .define("refillSound", false);
+                        "Play the container's own sound when its loot actually regenerates.",
+                        "Default: true.")
+                .define("playRefillSound", true);
         builder.pop();
 
         SPEC = builder.build();

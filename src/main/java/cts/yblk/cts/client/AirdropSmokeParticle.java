@@ -24,7 +24,6 @@ public class AirdropSmokeParticle extends TextureSheetParticle {
         this.yd = yd + (double) (this.random.nextFloat() / 500.0F);
         this.zd = zd;
         this.setAlpha(0.92F);
-        // Soft golden — less fiery orange
         this.setColor(0.95F, 0.78F, 0.32F);
     }
 

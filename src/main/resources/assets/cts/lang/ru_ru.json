@@ -257,6 +257,7 @@
   "item.cts.chest_library.tooltip_save": "Shift+ПКМ по контейнеру CTS — сохранить",
   "gui.cts.cancel": "Отмена",
   "gui.cts.chest_library.title": "Библиотека сундуков",
+  "gui.cts.chest_library.count": "Сохранено: %s",
   "gui.cts.chest_library.empty": "Пока нет сохранённых сундуков",
   "gui.cts.chest_library.refresh": "Обновить",
   "gui.cts.chest_library.preview": "Просмотр",

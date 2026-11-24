@@ -136,5 +136,9 @@ public class ModNetwork {
                 RefillContainerPacket::encode,
                 RefillContainerPacket::decode,
                 RefillContainerPacket::handle);
+        CHANNEL.registerMessage(id++, PlaceGhostItemPacket.class,
+                PlaceGhostItemPacket::encode,
+                PlaceGhostItemPacket::decode,
+                PlaceGhostItemPacket::handle);
     }
 }

@@ -6,7 +6,6 @@ import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import cts.yblk.cts.Cts;
-import cts.yblk.cts.client.ui.CtsTheme;
 
 /**
  * Cloth Config UI — only loaded when cloth_config is present ({@link ClothConfigHook}).
@@ -51,15 +50,6 @@ final class ClothConfigScreens {
                 .build());
 
         ConfigCategory ui = builder.getOrCreateCategory(Component.translatable("config." + Cts.MODID + ".ui"));
-        ui.addEntry(entries.startEnumSelector(
-                        Component.translatable("config." + Cts.MODID + ".ui.creativeTheme"),
-                        CtsTheme.class,
-                        CtsTheme.current())
-                .setDefaultValue(CtsTheme.WOOD)
-                .setEnumNameProvider(value -> Component.translatable(((CtsTheme) value).nameKey()))
-                .setTooltip(Component.translatable(CtsTheme.current().descriptionKey()))
-                .setSaveConsumer(theme -> CtsConfig.setCreativeTheme(theme.id()))
-                .build());
         ui.addEntry(entries.startBooleanToggle(
                         Component.translatable("config." + Cts.MODID + ".ui.buttonSounds"),
                         CtsConfig.buttonSounds())

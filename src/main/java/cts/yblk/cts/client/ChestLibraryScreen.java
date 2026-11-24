@@ -202,9 +202,18 @@ public class ChestLibraryScreen extends Screen {
         renderBackground(graphics);
         int panelTop = 28;
         int panelH = this.height - 40;
-        ThemeRenderer.panel(graphics, 8, panelTop, this.width - 16, panelH);
+        int panelX = 8;
+        int panelRight = this.width - 8;
+        graphics.fill(panelX, panelTop, panelRight, panelTop + panelH, 0xFF1A1A1A);
+        graphics.fill(panelX, panelTop, panelRight, panelTop + 1, 0xFF4A4A4A);
+        graphics.fill(panelX, panelTop + panelH - 1, panelRight, panelTop + panelH, 0xFF4A4A4A);
+        int divider = 16 + LEFT_W + 6;
+        graphics.fill(16, panelTop + 28, divider - 4, panelTop + panelH - 8, 0xFF121212);
+        graphics.fill(divider, panelTop + 8, divider + 1, panelTop + panelH - 8, 0xFF3A3A3A);
         CtsTheme theme = CtsTheme.current();
-        graphics.drawString(font, this.title, 16, 10, theme.ink(), false);
+        graphics.drawString(font, this.title, 16, 8, 0xFFFFFF, false);
+        graphics.drawString(font, Component.translatable("gui.cts.chest_library.count", visible.size()),
+                16, 18, 0xFFB0B0B0, false);
 
         int listTop = 56;
         int rows = listRows();
@@ -217,11 +226,14 @@ public class ChestLibraryScreen extends Screen {
             SavedChestLibrary.Entry entry = visible.get(index);
             int y = listTop + i * ROW;
             boolean selected = entry.id().equals(selectedId);
-            ThemeRenderer.listRow(graphics, left, y, LEFT_W, ROW - 2, selected);
+            graphics.fill(left, y, left + LEFT_W, y + ROW - 2, selected ? 0xFF2C4A38 : 0xFF242424);
+            if (selected) {
+                graphics.fill(left, y, left + 2, y + ROW - 2, 0xFF6FCF97);
+            }
             ItemStack icon = icon(entry);
             graphics.renderItem(icon, left + 2, y + 2);
-            graphics.drawString(font, trim(entry.name(), 78), left + 22, y + 2, theme.ink(), false);
-            graphics.drawString(font, trim(badge(entry), 78), left + 22, y + 11, theme.muted(), false);
+            graphics.drawString(font, trim(entry.name(), 78), left + 22, y + 2, 0xFFFFFF, false);
+            graphics.drawString(font, trim(badge(entry), 78), left + 22, y + 11, 0xFFB0B0B0, false);
         }
         if (visible.size() > rows) {
             int track = rows * ROW;
@@ -231,7 +243,7 @@ public class ChestLibraryScreen extends Screen {
             ThemeRenderer.scrollbar(graphics, left + LEFT_W - 8, listTop, track, thumbY, thumb);
         }
         if (visible.isEmpty()) {
-            graphics.drawString(font, Component.translatable("gui.cts.chest_library.empty"), left + 4, listTop + 8, theme.ink(), false);
+            graphics.drawString(font, Component.translatable("gui.cts.chest_library.empty"), left + 4, listTop + 8, 0xFFFFFF, false);
             graphics.drawWordWrap(font, Component.translatable("gui.cts.chest_library.hint"), left + 4, listTop + 22, LEFT_W - 12, theme.muted());
         }
 
@@ -250,11 +262,11 @@ public class ChestLibraryScreen extends Screen {
     private void drawDetail(GuiGraphics graphics, CtsTheme theme, SavedChestLibrary.Entry entry, int x, int y) {
         CompoundTag stash = entry.stash();
         boolean lootTable = "LOOT_TABLE".equals(stash.getString("Mode"));
-        graphics.drawString(font, entry.name(), x, y, theme.ink(), false);
+        graphics.drawString(font, entry.name(), x, y, 0xFFFFFF, false);
         if (lootTable) {
             String table = stash.getString("LootTable");
             graphics.drawString(font, Component.translatable("gui.cts.chest_library.table", table.isBlank() ? "-" : table),
-                    x, y + 14, theme.ink(), false);
+                    x, y + 14, 0xFFFFFF, false);
             graphics.drawWordWrap(font, Component.translatable("gui.cts.chest_library.table_note"), x, y + 28, this.width - x - 24, theme.muted());
         } else {
             ItemStackHandler template = new ItemStackHandler(CanStashBlockEntity.SLOT_COUNT);
@@ -286,16 +298,16 @@ public class ChestLibraryScreen extends Screen {
         }
         int infoY = lootTable ? y + 64 : y + 76;
         graphics.drawString(font, Component.translatable("gui.cts.chest_library.respawn", stash.getInt("RespawnSeconds")),
-                x, infoY, theme.muted(), false);
+                x, infoY, 0xFFE8E8E8, false);
         graphics.drawString(font, Component.translatable("gui.cts.chest_library.search_time", stash.getInt("SearchSeconds")),
-                x, infoY + 12, theme.muted(), false);
+                x, infoY + 12, 0xFFE8E8E8, false);
         graphics.drawString(font, Component.translatable(stash.getBoolean("RequiresTool")
                         ? "gui.cts.chest_library.tool_yes" : "gui.cts.chest_library.tool_no"),
-                x, infoY + 24, theme.muted(), false);
+                x, infoY + 24, 0xFFE8E8E8, false);
         if (stash.contains("PerPlayer")) {
             graphics.drawString(font, Component.translatable(stash.getBoolean("PerPlayer")
                             ? "gui.cts.per_player.on" : "gui.cts.per_player.off"),
-                    x, infoY + 36, theme.muted(), false);
+                    x, infoY + 36, 0xFFE8E8E8, false);
         }
     }
 

@@ -3,6 +3,7 @@ package cts.yblk.cts.library;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
@@ -14,12 +15,20 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLPaths;
 import cts.yblk.cts.Cts;
 import cts.yblk.cts.block.CopiedBlock;
 import cts.yblk.cts.blockentity.CanStashBlockEntity;
 import cts.yblk.cts.blockentity.ConvertedContainerBlockEntity;
 import cts.yblk.cts.registry.ModBlocks;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,14 +38,73 @@ import java.util.UUID;
 /**
  * Per-world library of saved CTS stash configurations (props and converted containers).
  */
+@Mod.EventBusSubscriber(modid = Cts.MODID)
 public final class SavedChestLibrary extends SavedData {
     private static final String DATA_NAME = Cts.MODID + "_saved_chests";
+    private static SavedChestLibrary live;
 
     private final List<Entry> entries = new ArrayList<>();
 
+    /**
+     * One library for the whole game, stored under config/cts so it survives world changes.
+     * An older per-world copy is imported the first time the file is empty.
+     */
     public static SavedChestLibrary get(ServerLevel level) {
-        DimensionDataStorage storage = level.getServer().overworld().getDataStorage();
-        return storage.computeIfAbsent(SavedChestLibrary::load, SavedChestLibrary::new, DATA_NAME);
+        if (live != null) {
+            return live;
+        }
+        live = readFile();
+        if (live.entries.isEmpty()) {
+            DimensionDataStorage storage = level.getServer().overworld().getDataStorage();
+            SavedChestLibrary legacy = storage.get(SavedChestLibrary::load, DATA_NAME);
+            if (legacy != null && !legacy.entries.isEmpty()) {
+                live.entries.addAll(legacy.entries);
+                live.writeFile();
+            }
+        }
+        return live;
+    }
+
+    @SubscribeEvent
+    public static void onServerStop(ServerStoppingEvent event) {
+        if (live != null) {
+            live.writeFile();
+            live = null;
+        }
+    }
+
+    private static Path file() {
+        return FMLPaths.CONFIGDIR.get().resolve(Cts.MODID).resolve("chest_library.nbt");
+    }
+
+    private static SavedChestLibrary readFile() {
+        Path path = file();
+        if (Files.isRegularFile(path)) {
+            try (InputStream in = Files.newInputStream(path)) {
+                CompoundTag tag = NbtIo.readCompressed(in);
+                if (tag != null) {
+                    return load(tag);
+                }
+            } catch (IOException ignored) {
+                // Fall through to an empty library. The previous file is left in place.
+            }
+        }
+        return new SavedChestLibrary();
+    }
+
+    private void writeFile() {
+        try {
+            Files.createDirectories(file().getParent());
+            NbtIo.writeCompressed(save(new CompoundTag()), file().toFile());
+        } catch (IOException ignored) {
+            // The in-memory list stays; the next save retries.
+        }
+    }
+
+    @Override
+    public void setDirty() {
+        super.setDirty();
+        writeFile();
     }
 
     public List<Entry> entries() {

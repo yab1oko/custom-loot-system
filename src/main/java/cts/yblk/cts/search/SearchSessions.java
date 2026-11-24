@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Mod.EventBusSubscriber(modid = Cts.MODID)
 public final class SearchSessions {
-    private static final int GRACE_TICKS = 3;
+    private static final int GRACE_TICKS = 20;
     private static final int STALE_TICKS = 40;
     private static final Map<UUID, Active> ACTIVE = new ConcurrentHashMap<>();
 
@@ -37,7 +37,16 @@ public final class SearchSessions {
     }
 
     public static void stop(ServerPlayer player) {
-        ACTIVE.remove(player.getUUID());
+        Active active = ACTIVE.get(player.getUUID());
+        if (active == null) {
+            return;
+        }
+        // Releasing early cancels the search. Finishing (or the stop packet racing
+        // the open packet) must keep the session so the container can still open.
+        long elapsed = player.serverLevel().getGameTime() - active.startTick;
+        if (elapsed + GRACE_TICKS < active.requiredTicks) {
+            ACTIVE.remove(player.getUUID());
+        }
     }
 
     public static boolean allowOpen(ServerPlayer player, BlockPos inventory) {

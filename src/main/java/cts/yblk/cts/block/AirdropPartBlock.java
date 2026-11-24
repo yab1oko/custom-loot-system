@@ -79,7 +79,12 @@ public class AirdropPartBlock extends Block {
 
     @Override
     public float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
-        return player.getAbilities().instabuild ? 1.0F : 0.0F;
+        BlockPos master = AirdropStructure.masterFromPart(level, pos, state.getValue(FACING));
+        BlockState masterState = level.getBlockState(master);
+        if (masterState.getBlock() instanceof AirdropBlock airdrop) {
+            return airdrop.getDestroyProgress(masterState, player, level, master);
+        }
+        return super.getDestroyProgress(state, player, level, pos);
     }
 
     @Override
@@ -116,9 +121,9 @@ public class AirdropPartBlock extends Block {
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock()) && !level.isClientSide && !AirdropBlock.isBreaking()) {
-            BlockPos master = AirdropStructure.masterFromPart(level, pos);
-            if (level.getBlockState(master).getBlock() instanceof AirdropBlock) {
-                level.destroyBlock(master, false);
+            BlockPos master = AirdropStructure.masterFromPart(level, pos, state.getValue(FACING));
+            if (!master.equals(pos) && level.getBlockState(master).getBlock() instanceof AirdropBlock) {
+                AirdropBlock.destroyStructure(level, master);
             }
         }
         super.onRemove(state, level, pos, newState, isMoving);

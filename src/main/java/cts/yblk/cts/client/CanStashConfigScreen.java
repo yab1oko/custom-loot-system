@@ -105,7 +105,7 @@ public class CanStashConfigScreen extends AbstractContainerScreen<CanStashConfig
             perPlayer = !perPlayer;
             button.setMessage(perPlayerLabel());
             sendSettings();
-        }).bounds(leftPos + 8, topPos + 133 + CanStashConfigMenu.TOP_EXTRA, 100, 16).build());
+        }).bounds(leftPos + 8, topPos + 133 + CanStashConfigMenu.TOP_EXTRA, 96, 16).build());
 
         addRenderableWidget(ThemedButton.create(refillLabel(), button -> {
             refillMode = refillMode == CanStashBlockEntity.RefillMode.REPLACE
@@ -113,12 +113,12 @@ public class CanStashConfigScreen extends AbstractContainerScreen<CanStashConfig
                     : CanStashBlockEntity.RefillMode.REPLACE;
             button.setMessage(refillLabel());
             sendSettings();
-        }).bounds(leftPos + 8, topPos + 151 + CanStashConfigMenu.TOP_EXTRA, 110, 16).build());
+        }).bounds(leftPos + 8, topPos + 151 + CanStashConfigMenu.TOP_EXTRA, 160, 16).build());
 
         addRenderableWidget(ThemedButton.create(Component.translatable("gui.cts.refill_now"), button -> {
             sendSettings();
             ModNetwork.CHANNEL.sendToServer(new cts.yblk.cts.network.RefillContainerPacket(stash.getBlockPos()));
-        }).bounds(leftPos + imageWidth - 78, topPos + 151 + CanStashConfigMenu.TOP_EXTRA, 70, 16).build());
+        }).bounds(leftPos + 108, topPos + 133 + CanStashConfigMenu.TOP_EXTRA, 60, 16).build());
 
         updateModeWidgets();
     }
@@ -212,24 +212,43 @@ public class CanStashConfigScreen extends AbstractContainerScreen<CanStashConfig
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        ThemeRenderer.panel(graphics, leftPos, topPos, imageWidth, imageHeight);
-        for (Slot slot : menu.slots) {
-            if (slot.isActive()) {
-                ThemeRenderer.slot(graphics, leftPos + slot.x - 1, topPos + slot.y - 1);
+        int x = leftPos;
+        int y = topPos;
+        int extra = CanStashConfigMenu.TOP_EXTRA;
+        graphics.blit(TEXTURE, x, y, 0, 0, imageWidth, 17);
+        for (int i = 0; i < extra; i++) {
+            graphics.blit(TEXTURE, x, y + 17 + i, 0, 16, imageWidth, 1);
+        }
+        int gridY = y + 17 + extra;
+        if (isItemMode()) {
+            graphics.blit(TEXTURE, x, gridY, 0, 17, imageWidth, 54);
+        } else {
+            for (int i = 0; i < 54; i++) {
+                graphics.blit(TEXTURE, x, gridY + i, 0, 16, imageWidth, 1);
+            }
+        }
+        int settingsY = gridY + 54;
+        for (int i = 0; i < SETTINGS; i++) {
+            graphics.blit(TEXTURE, x, settingsY + i, 0, 16, imageWidth, 1);
+        }
+        graphics.blit(TEXTURE, x, settingsY + SETTINGS, 0, 126, imageWidth, 96);
+        if (requiresTool) {
+            int slotY = y + CanStashConfigMenu.TOOL_SLOT_Y - 1;
+            for (int col = 0; col < CanStashBlockEntity.TOOL_SLOTS; col++) {
+                graphics.blit(TEXTURE, x + 7 + col * 18, slotY, 7, 17, 18, 18);
             }
         }
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        int ink = CtsTheme.current().ink();
-        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, ink, false);
-        graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, ink, false);
+        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 0x404040, false);
+        graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 0x404040, false);
         int extra = CanStashConfigMenu.TOP_EXTRA;
-        graphics.drawString(this.font, Component.translatable("gui.cts.respawn"), 52, 77 + extra, ink, false);
-        graphics.drawString(this.font, Component.translatable("gui.cts.open_time"), 52, 97 + extra, ink, false);
+        graphics.drawString(this.font, Component.translatable("gui.cts.respawn"), 52, 77 + extra, 0x404040, false);
+        graphics.drawString(this.font, Component.translatable("gui.cts.open_time"), 52, 97 + extra, 0x404040, false);
         if (!isItemMode()) {
-            graphics.drawString(this.font, Component.translatable("gui.cts.loot_table"), 8, 22 + extra, ink, false);
+            graphics.drawString(this.font, Component.translatable("gui.cts.loot_table"), 8, 22 + extra, 0x404040, false);
         }
     }
 

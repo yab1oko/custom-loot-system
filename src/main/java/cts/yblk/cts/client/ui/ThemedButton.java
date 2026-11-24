@@ -50,12 +50,7 @@ public class ThemedButton extends Button {
 
     @Override
     protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        boolean down = this.pressed && this.isHovered();
-        ThemeRenderer.button(graphics, getX(), getY(), getWidth(), getHeight(), isHoveredOrFocused(), down, this.active);
-        CtsTheme theme = CtsTheme.current();
-        int color = !this.active ? theme.muted() : this.danger ? theme.danger() : theme.buttonText();
-        graphics.drawCenteredString(Minecraft.getInstance().font, getMessage(),
-                getX() + getWidth() / 2, getY() + (getHeight() - 8) / 2, color);
+        super.renderWidget(graphics, mouseX, mouseY, partialTick);
     }
 
     @OnlyIn(Dist.CLIENT)

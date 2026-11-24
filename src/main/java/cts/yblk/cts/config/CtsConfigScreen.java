@@ -30,13 +30,6 @@ public final class CtsConfigScreen extends Screen {
         int cx = this.width / 2;
         int y = 48;
 
-        addRenderableWidget(ThemedButton.create(themeLabel(), button -> {
-            CtsTheme next = CtsTheme.current().next();
-            CtsConfig.setCreativeTheme(next.id());
-            CtsConfig.save();
-            button.setMessage(themeLabel());
-        }).bounds(cx - 100, y, 200, 20).build());
-
         addRenderableWidget(ThemedButton.create(soundsLabel(), button -> {
             CtsConfig.setButtonSounds(!CtsConfig.buttonSounds());
             CtsConfig.save();
@@ -65,12 +58,6 @@ public final class CtsConfigScreen extends Screen {
             save();
             onClose();
         }).bounds(cx - 100, this.height - 32, 200, 20).build());
-    }
-
-    private static Component themeLabel() {
-        return Component.translatable("config." + Cts.MODID + ".ui.creativeTheme")
-                .append(": ")
-                .append(Component.translatable(CtsTheme.current().nameKey()));
     }
 
     private static Component soundsLabel() {
@@ -104,9 +91,6 @@ public final class CtsConfigScreen extends Screen {
         ThemeRenderer.panel(graphics, cx - 120, panelTop, 240, panelBottom - panelTop);
         CtsTheme theme = CtsTheme.current();
         graphics.drawCenteredString(this.font, this.title, cx, 36, theme.ink());
-        graphics.drawCenteredString(this.font,
-                Component.translatable(theme.descriptionKey()),
-                cx, 72, theme.muted());
         graphics.drawString(this.font,
                 Component.translatable("config." + Cts.MODID + ".loot.defaultRespawnSeconds"),
                 cx - 100, 140, theme.muted());

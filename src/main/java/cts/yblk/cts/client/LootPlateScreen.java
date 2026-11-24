@@ -81,12 +81,12 @@ public class LootPlateScreen extends AbstractContainerScreen<LootPlateMenu> {
             perPlayer = !perPlayer;
             button.setMessage(Component.translatable(perPlayer ? "gui.cts.per_player.on" : "gui.cts.per_player.off"));
             sendSettings();
-        }).bounds(leftPos + 8, topPos + 92 + LootPlateMenu.TOP_EXTRA, 110, 16).build());
+        }).bounds(leftPos + 8, topPos + 92 + LootPlateMenu.TOP_EXTRA, 160, 16).build());
 
         addRenderableWidget(ThemedButton.create(Component.translatable("gui.cts.refill_now"), button -> {
             sendSettings();
             ModNetwork.CHANNEL.sendToServer(new cts.yblk.cts.network.RefillContainerPacket(plate.getBlockPos()));
-        }).bounds(leftPos + imageWidth - 78, topPos + 92 + LootPlateMenu.TOP_EXTRA, 70, 16).build());
+        }).bounds(leftPos + 8, topPos + 110 + LootPlateMenu.TOP_EXTRA, 80, 16).build());
 
         updateModeWidgets();
     }
@@ -156,23 +156,36 @@ public class LootPlateScreen extends AbstractContainerScreen<LootPlateMenu> {
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        ThemeRenderer.panel(graphics, leftPos, topPos, imageWidth, imageHeight);
-        for (Slot slot : menu.slots) {
-            if (slot.isActive()) {
-                ThemeRenderer.slot(graphics, leftPos + slot.x - 1, topPos + slot.y - 1);
+        int x = leftPos;
+        int y = topPos;
+        int extra = LootPlateMenu.TOP_EXTRA;
+        graphics.blit(TEXTURE, x, y, 0, 0, imageWidth, 17);
+        for (int i = 0; i < extra; i++) {
+            graphics.blit(TEXTURE, x, y + 17 + i, 0, 16, imageWidth, 1);
+        }
+        int gridY = y + 17 + extra;
+        if (isItemMode()) {
+            graphics.blit(TEXTURE, x, gridY, 0, 17, imageWidth, 54);
+        } else {
+            for (int i = 0; i < 54; i++) {
+                graphics.blit(TEXTURE, x, gridY + i, 0, 16, imageWidth, 1);
             }
         }
+        int settingsY = gridY + 54;
+        for (int i = 0; i < SETTINGS; i++) {
+            graphics.blit(TEXTURE, x, settingsY + i, 0, 16, imageWidth, 1);
+        }
+        graphics.blit(TEXTURE, x, settingsY + SETTINGS, 0, 126, imageWidth, 96);
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        int ink = CtsTheme.current().ink();
-        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, ink, false);
-        graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, ink, false);
+        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 0x404040, false);
+        graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 0x404040, false);
         int extra = LootPlateMenu.TOP_EXTRA;
-        graphics.drawString(this.font, Component.translatable("gui.cts.respawn"), 52, 77 + extra, ink, false);
+        graphics.drawString(this.font, Component.translatable("gui.cts.respawn"), 52, 77 + extra, 0x404040, false);
         if (!isItemMode()) {
-            graphics.drawString(this.font, Component.translatable("gui.cts.loot_table"), 8, 22 + extra, ink, false);
+            graphics.drawString(this.font, Component.translatable("gui.cts.loot_table"), 8, 22 + extra, 0x404040, false);
         }
     }
 

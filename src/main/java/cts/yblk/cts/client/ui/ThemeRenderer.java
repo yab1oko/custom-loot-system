@@ -20,30 +20,13 @@ public final class ThemeRenderer {
     private ThemeRenderer() {
     }
 
+    private static final ResourceLocation CHEST = new ResourceLocation("textures/gui/container/generic_54.png");
+
     public static void panel(GuiGraphics graphics, int x, int y, int w, int h) {
         if (w <= 0 || h <= 0) {
             return;
         }
-        CtsTheme theme = CtsTheme.current();
-        blitNine(graphics, theme.sheet(), x, y, w, h, PANEL_U, PANEL_V, PANEL_SIZE, PANEL_SIZE, PANEL_BORDER);
-        if (theme.ledger() && w > 10 && h > 10) {
-            int ink = (theme.ink() & 0x00FFFFFF) | 0x18000000;
-            for (int line = y + 8; line < y + h - 4; line += 4) {
-                graphics.fill(x + 5, line, x + w - 5, line + 1, ink);
-            }
-        }
-        if (theme.rivets()) {
-            int rivet = theme == CtsTheme.WOOD ? 0xFFD0D0D0 : 0xFFC8CDD2;
-            int hole = 0xFF2A2E32;
-            rivet(graphics, x + 2, y + 2, rivet, hole);
-            rivet(graphics, x + w - 5, y + 2, rivet, hole);
-            rivet(graphics, x + 2, y + h - 5, rivet, hole);
-            rivet(graphics, x + w - 5, y + h - 5, rivet, hole);
-        }
-        if (theme == CtsTheme.IRON && h > 14) {
-            graphics.fill(x + 4, y + 3, x + w - 4, y + 14, theme.accent());
-            graphics.fill(x + 4, y + 3, x + w - 4, y + 4, theme.bevelLight());
-        }
+        graphics.blit(CHEST, x, y, w, h, 0, 4, 176, 12, 256, 256);
     }
 
     public static void inset(GuiGraphics graphics, int x, int y, int w, int h) {
@@ -56,9 +39,7 @@ public final class ThemeRenderer {
     }
 
     public static void slot(GuiGraphics graphics, int x, int y) {
-        CtsTheme theme = CtsTheme.current();
-        graphics.fill(x, y, x + 18, y + 18, theme.slotEdge());
-        graphics.fill(x + 1, y + 1, x + 17, y + 17, theme.slotFill());
+        graphics.blit(CHEST, x, y, 18, 18, 7, 17, 18, 18, 256, 256);
     }
 
     public static void listRow(GuiGraphics graphics, int x, int y, int w, int h, boolean selected) {

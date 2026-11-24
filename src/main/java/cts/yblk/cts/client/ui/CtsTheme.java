@@ -4,7 +4,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import cts.yblk.cts.Cts;
-import cts.yblk.cts.config.CtsConfig;
 
 /**
  * Creative-screen themes. Survival chests stay vanilla.
@@ -13,7 +12,7 @@ import cts.yblk.cts.config.CtsConfig;
 public enum CtsTheme {
     VANILLA("vanilla", "config.cts.ui.theme.vanilla", "config.cts.ui.theme.vanilla.desc",
             0xFFC6C6C6, 0xFFFFFFFF, 0xFF373737, 0xFF8B8B8B,
-            0xFF404040, 0xFF555555, 0xFFFFFFFF,
+            0xFF404040, 0xFF555555, 0xFF404040,
             0xFF8B8B8B, 0xFFA0A0A0, 0xFF6E6E6E, 0xFF555555,
             0xFFB4B4B4, 0xFF8B8B8B, 0xFF373737,
             false, false),
@@ -190,6 +189,7 @@ public enum CtsTheme {
     }
 
     public static CtsTheme current() {
-        return fromId(CtsConfig.creativeTheme());
+        // Creative themes were reverted: every screen uses the original vanilla GUI.
+        return VANILLA;
     }
 }

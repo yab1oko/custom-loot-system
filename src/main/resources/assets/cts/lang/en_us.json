@@ -257,6 +257,7 @@
   "item.cts.chest_library.tooltip_save": "Shift+RMB a CTS container — save to library",
   "gui.cts.cancel": "Cancel",
   "gui.cts.chest_library.title": "Chest Library",
+  "gui.cts.chest_library.count": "%s saved",
   "gui.cts.chest_library.empty": "No saved chests yet",
   "gui.cts.chest_library.refresh": "Refresh",
   "gui.cts.chest_library.preview": "Preview",

@@ -15,7 +15,7 @@ import cts.yblk.cts.registry.ModBlocks;
 import cts.yblk.cts.registry.ModMenus;
 
 public class LootPlateMenu extends AbstractContainerMenu {
-    public static final int SETTINGS_PIXELS = 48;
+    public static final int SETTINGS_PIXELS = 72;
     public static final int TOP_EXTRA = 10;
 
     private final LootPlateBlockEntity plate;

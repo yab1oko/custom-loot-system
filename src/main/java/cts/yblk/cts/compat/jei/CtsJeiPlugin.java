@@ -3,13 +3,16 @@ package cts.yblk.cts.compat.jei;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import cts.yblk.cts.Cts;
+import cts.yblk.cts.client.CanStashConfigScreen;
 import cts.yblk.cts.client.ChestLibraryClient;
+import cts.yblk.cts.client.LootPlateScreen;
 import cts.yblk.cts.library.SavedChestLibrary;
 import cts.yblk.cts.registry.ModItems;
 
@@ -26,6 +29,12 @@ public class CtsJeiPlugin implements IModPlugin {
     @Override
     public ResourceLocation getPluginUid() {
         return new ResourceLocation(Cts.MODID, "jei");
+    }
+
+    @Override
+    public void registerGuiHandlers(IGuiHandlerRegistration registration) {
+        registration.addGhostIngredientHandler(CanStashConfigScreen.class, new CtsGhostSlots<>());
+        registration.addGhostIngredientHandler(LootPlateScreen.class, new CtsGhostSlots<>());
     }
 
     @Override

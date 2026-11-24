@@ -317,6 +317,7 @@ public class ModBlocks {
                     .noLootTable()
                     .noOcclusion()
                     .sound(SoundType.WOOD)
+                    .lightLevel(state -> 6)
                     .pushReaction(PushReaction.BLOCK)));
 
     public static final RegistryObject<Block> AIRDROP_PART = BLOCKS.register("airdrop_part",

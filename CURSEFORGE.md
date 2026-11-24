@@ -1,22 +1,39 @@
 # CurseForge paste — Custom Loot System 4.1
 
-Do not upload until the page is reviewed. Description body is `README.md` (English). Discord: https://discord.gg/tXMBWwSuRp
+Do not upload until you review the page. Paste `README.md` as the description. Discord: https://discord.gg/tXMBWwSuRp
 
 ## Summary
+
 Forge 1.20.1 mapmaking tool: searchable props, loot plates, and airdrops. Survival players search and take the loot.
 
-## File
-- Jar: `build/libs/cts-4.1.jar`
-- Minecraft 1.20.1, Forge, client and server
-- Changelog: the 4.1 section of `CHANGELOG.md` (English block)
+## Project page
 
-## Relations
+- Name: Custom Loot System
+- Slug: `custom-loot-system`
+- Summary: the line above
+- Description: `README.md` (English). Upload new screenshots first, then paste forgecdn URLs. Do not invent image links.
+- Source / issues: https://github.com/yab1oko/custom-loot-system
+- Logo: `cts.png` in the jar
+- Categories: primary **Adventure and RPG**. Also **Utility & QoL**, **Server Utility**.
+- License on the page: leave it until you confirm it. `gradle.properties` and the jar say **All Rights Reserved**. The live CurseForge page has been MIT. Do not switch either side in this release.
+
+## File upload
+
+- Jar: `build/libs/cts-4.1.jar` (also copied to the Desktop)
+- Minecraft **1.20.1**, loader **Forge**, environment **Client and Server**
+- Changelog: the English `4.1` section of `CHANGELOG.md`
+
+### Relations
+
 Required: Minecraft, Forge.
 
-Optional: Cloth Config, Player Animator, JEI, KubeJS, Cold Weapons, Real First Person (`features`).
+Optional (the mod loads without them):
 
-## Categories
-Primary: Adventure and RPG. Also: Utility & QoL, Server Utility.
+- Cloth Config
+- Player Animator
+- JEI
+- KubeJS
+- Cold Weapons
+- Real First Person (`features`)
 
-## License
-Leave the page as the author confirms it. The repo and `gradle.properties` say All Rights Reserved. The live CurseForge page has been described as MIT. Do not switch either side until that is confirmed.
+No incompatible mods are declared.

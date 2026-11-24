@@ -56,6 +56,27 @@ public final class AirdropStructure {
         Direction facing = partState.hasProperty(AirdropPartBlock.FACING)
                 ? partState.getValue(AirdropPartBlock.FACING)
                 : Direction.NORTH;
+        return masterFromPart(level, part, facing);
+    }
+
+    public static BlockPos masterFromPart(BlockGetter level, BlockPos part, Direction facing) {
+        BlockPos found = findMaster(level, part, facing);
+        if (found != null) {
+            return found;
+        }
+        for (Direction dir : Direction.Plane.HORIZONTAL) {
+            if (dir == facing) {
+                continue;
+            }
+            found = findMaster(level, part, dir);
+            if (found != null) {
+                return found;
+            }
+        }
+        return part;
+    }
+
+    private static BlockPos findMaster(BlockGetter level, BlockPos part, Direction facing) {
         for (int dy = 0; dy <= 1; dy++) {
             BlockPos layer = part.below(dy);
             for (int[] local : footprint()) {
@@ -65,7 +86,7 @@ public final class AirdropStructure {
                 }
             }
         }
-        return part;
+        return null;
     }
 
     public static void place(LevelAccessor level, BlockPos master, Direction facing) {

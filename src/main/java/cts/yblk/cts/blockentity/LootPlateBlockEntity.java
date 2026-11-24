@@ -81,9 +81,12 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
     private Mode mode = Mode.ITEMS;
     private int respawnSeconds = DEFAULT_RESPAWN_SECONDS;
     private int cooldownTicks;
+    /** Absolute server game time when the plate refills. 0 = not armed. */
+    private long refillAt;
     private float spin;
     private boolean perPlayerLoot;
     private final Map<UUID, Integer> playerCooldown = new LinkedHashMap<>();
+    private final Map<UUID, Long> playerReadyAt = new LinkedHashMap<>();
 
     public LootPlateBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.LOOT_PLATE.get(), pos, state);
@@ -241,8 +244,10 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
         }
         if (perPlayerLoot && player != null) {
             playerCooldown.remove(player.getUUID());
+            playerReadyAt.remove(player.getUUID());
         }
         cooldownTicks = 0;
+        refillAt = 0L;
         spawnFromSource(player, true);
         syncToClient();
     }
@@ -264,7 +269,7 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
                     dropped.setNoPickUpDelay();
                 }
             }
-            playerCooldown.put(player.getUUID(), respawnSeconds <= 0 ? -1 : respawnSeconds * 20);
+            armPlayer(player.getUUID(), respawnSeconds <= 0 ? -1 : respawnSeconds * 20);
             if (level != null) {
                 float pitch = (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * 0.7F + 1.0F;
                 level.playSound(null, worldPosition, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, pitch * 2.0F);
@@ -278,7 +283,7 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
         }
         ItemStack taken = displayedItem.copy();
         displayedItem = ItemStack.EMPTY;
-        cooldownTicks = respawnSeconds <= 0 ? -1 : respawnSeconds * 20;
+        armShared(respawnSeconds <= 0 ? -1 : respawnSeconds * 20);
         if (!player.getInventory().add(taken)) {
             ItemEntity dropped = player.drop(taken, false);
             if (dropped != null) {
@@ -295,27 +300,78 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, LootPlateBlockEntity plate) {
-        if (plate.perPlayerLoot && !plate.playerCooldown.isEmpty()) {
-            for (Map.Entry<UUID, Integer> entry : plate.playerCooldown.entrySet()) {
-                int cooldown = entry.getValue();
-                if (cooldown > 0) {
-                    entry.setValue(cooldown - 1);
-                }
-            }
-        }
+        plate.catchUpPlayers();
         if (plate.perPlayerLoot) {
             return;
         }
         if (!plate.displayedItem.isEmpty() || !plate.isConfigured() || plate.cooldownTicks < 0) {
             return;
         }
-        if (plate.cooldownTicks > 0) {
-            plate.cooldownTicks--;
+        plate.catchUpShared();
+    }
+
+    private void armShared(int ticks) {
+        cooldownTicks = ticks;
+        if (ticks <= 0 || level == null) {
+            refillAt = 0L;
+        } else {
+            refillAt = level.getGameTime() + ticks;
         }
-        if (plate.cooldownTicks == 0) {
-            plate.spawnFromSource(null, true);
-            plate.setChanged();
-            plate.syncToClient();
+    }
+
+    private void armPlayer(UUID id, int ticks) {
+        playerCooldown.put(id, ticks);
+        if (ticks <= 0 || level == null) {
+            playerReadyAt.remove(id);
+        } else {
+            playerReadyAt.put(id, level.getGameTime() + ticks);
+        }
+    }
+
+    private void catchUpShared() {
+        if (level == null) {
+            return;
+        }
+        if (cooldownTicks > 0 && refillAt == 0L) {
+            refillAt = level.getGameTime() + cooldownTicks;
+        }
+        if (refillAt > 0L) {
+            long left = refillAt - level.getGameTime();
+            if (left <= 0L) {
+                cooldownTicks = 0;
+                refillAt = 0L;
+            } else {
+                cooldownTicks = (int) Math.min(Integer.MAX_VALUE, left);
+                if (cooldownTicks % 20 == 0) {
+                    setChanged();
+                }
+                return;
+            }
+        }
+        if (cooldownTicks == 0) {
+            spawnFromSource(null, true);
+            setChanged();
+            syncToClient();
+        }
+    }
+
+    private void catchUpPlayers() {
+        if (level == null || playerCooldown.isEmpty()) {
+            return;
+        }
+        long now = level.getGameTime();
+        for (Map.Entry<UUID, Integer> entry : playerCooldown.entrySet()) {
+            int cooldown = entry.getValue();
+            if (cooldown <= 0) {
+                continue;
+            }
+            Long ready = playerReadyAt.get(entry.getKey());
+            if (ready == null) {
+                playerReadyAt.put(entry.getKey(), now + cooldown);
+                continue;
+            }
+            long left = ready - now;
+            entry.setValue(left <= 0L ? 0 : (int) Math.min(Integer.MAX_VALUE, left));
         }
     }
 
@@ -323,9 +379,9 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
         displayedItem = rollLoot(player).copy();
         cts.yblk.cts.compat.kubejs.CtsKubeBridge.lootRolled(player, worldPosition, refilled);
         if (displayedItem.isEmpty()) {
-            cooldownTicks = respawnSeconds <= 0 ? -1 : Math.max(20, respawnSeconds * 20);
+            armShared(respawnSeconds <= 0 ? -1 : Math.max(20, respawnSeconds * 20));
         } else {
-            cooldownTicks = 0;
+            armShared(0);
             if (level != null) {
                 spin = level.random.nextFloat() * 360.0F;
             }
@@ -421,6 +477,7 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
         tag.putString("Mode", mode.name());
         tag.putInt("RespawnSeconds", respawnSeconds);
         tag.putInt("Cooldown", cooldownTicks);
+        tag.putLong("RefillAt", refillAt);
         tag.putFloat("Spin", spin);
         tag.putBoolean("PerPlayer", perPlayerLoot);
         ListTag players = new ListTag();
@@ -428,6 +485,10 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
             CompoundTag playerTag = new CompoundTag();
             playerTag.putUUID("Id", entry.getKey());
             playerTag.putInt("Cooldown", entry.getValue());
+            Long ready = playerReadyAt.get(entry.getKey());
+            if (ready != null) {
+                playerTag.putLong("ReadyAt", ready);
+            }
             players.add(playerTag);
         }
         tag.put("PlayerCooldown", players);
@@ -454,15 +515,20 @@ public class LootPlateBlockEntity extends BlockEntity implements MenuProvider {
                 ? tag.getInt("RespawnSeconds")
                 : CtsConfig.defaultLootRespawnSeconds();
         cooldownTicks = tag.getInt("Cooldown");
+        refillAt = tag.getLong("RefillAt");
         spin = tag.getFloat("Spin");
         perPlayerLoot = tag.getBoolean("PerPlayer");
         playerCooldown.clear();
+        playerReadyAt.clear();
         if (tag.contains("PlayerCooldown", Tag.TAG_LIST)) {
             ListTag players = tag.getList("PlayerCooldown", Tag.TAG_COMPOUND);
             for (int i = 0; i < players.size(); i++) {
                 CompoundTag playerTag = players.getCompound(i);
                 if (playerTag.hasUUID("Id")) {
                     playerCooldown.put(playerTag.getUUID("Id"), playerTag.getInt("Cooldown"));
+                    if (playerTag.contains("ReadyAt")) {
+                        playerReadyAt.put(playerTag.getUUID("Id"), playerTag.getLong("ReadyAt"));
+                    }
                 }
             }
         }
